@@ -25,6 +25,8 @@ file manually.
     * [Creating a new configuration file](#creating-a-new-configuration-file)
     * [Setting default values](#setting-default-values)
   * [Command-line usage](#command-line-usage)
+    * [Exporting a configuration file](#exporting-a-configuration-file)
+    * [Importing a configuration file](#importing-a-configuration-file)
     * [Editing a configuration file](#editing-a-configuration-file)
       * [Using an external editor](#using-an-external-editor)
       * [Inline command line editor](#inline-command-line-editor)
@@ -128,6 +130,26 @@ The command line interface can be executed by running `configlib` from the comma
 `ncc exec --package="net.nosial.configlib` if `configlib` isn't in your global path.
 
 For the rest of this documentation, we will assume that you have the `configlib` command in your global path.
+
+### Exporting a configuration file
+
+To export a configuration file, run the following command:
+
+```bash
+configlib --config <config_name> --export <filename>
+```
+
+Exported configuration files are stored as YAML files.
+
+ > Note: if the filename is not specified, the configuration file will be exported to the current working directory with the name `<config_name>.yaml`
+
+### Importing a configuration file
+
+To import a configuration file, you must specify a valid yaml file, run the following command:
+
+```bash
+configlib --config <config_name> --import <filename>
+```
 
 ### Editing a configuration file
 
