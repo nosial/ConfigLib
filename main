@@ -1,0 +1,7 @@
+<?php
+
+
+    require('ncc');
+    import('net.nosial.configlib', 'latest');
+
+    \ConfigLib\Program::main();

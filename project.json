@@ -1,0 +1,84 @@
+{
+    "project": {
+        "compiler": {
+            "extension": "php",
+            "minimum_version": "8.0",
+            "maximum_version": "8.2"
+        },
+        "update_source": {
+            "source": "nosial/libs.config@n64",
+            "repository": {
+                "name": "n64",
+                "type": "gitlab",
+                "host": "git.n64.cc",
+                "ssl": true
+            }
+        },
+        "options": {
+            "create_symlink": true
+        }
+    },
+    "execution_policies":[
+        {
+            "name": "main",
+            "runner": "php",
+            "execute": {
+                "target": "main",
+                "working_directory": "%CWD%",
+                "tty": true
+            }
+        }
+    ],
+    "assembly": {
+        "name": "ConfigLib",
+        "package": "net.nosial.configlib",
+        "company": "Nosial",
+        "copyright": "Copyright (c) 2022-2023 Nosial",
+        "description": "ConfigLib is a library for reading and writing configuration files via the NCC Runtime API",
+        "version": "1.0.0",
+        "uuid": "9347259e-8e4d-11ed-85a7-fd07cf28ef35"
+    },
+    "build": {
+        "source_path": "src",
+        "default_configuration": "release",
+        "main": "main",
+        "dependencies": [
+            {
+                "name": "net.nosial.optslib",
+                "version": "latest",
+                "source_type": "remote",
+                "source": "nosial/libs.opts=latest@n64"
+            },
+            {
+                "name": "net.nosial.loglib",
+                "version": "latest",
+                "source_type": "remote",
+                "source": "nosial/libs.log=latest@n64"
+            },
+            {
+                "name": "com.symfony.filesystem",
+                "version": "latest",
+                "source_type": "remote",
+                "source": "symfony/filesystem=latest@composer"
+            },
+            {
+                "name": "com.symfony.yaml",
+                "version": "latest",
+                "source_type": "remote",
+                "source": "symfony/yaml=latest@composer"
+            },
+            {
+                "name": "com.symfony.process",
+                "version": "latest",
+                "source_type": "remote",
+                "source": "symfony/process=latest@composer"
+            }
+        ],
+        "configurations": [
+            {
+                "name": "release",
+                "output_path": "build/release"
+            }
+        ]
+    }
+}
