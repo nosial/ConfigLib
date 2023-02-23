@@ -15,9 +15,7 @@
       <path value="/etc/ncc" />
       <path value="/var/ncc/packages/net.nosial.optslib=1.0.0" />
       <path value="/var/ncc/packages/net.nosial.loglib=1.0.1" />
-      <path value="/var/ncc/packages/com.symfony.process=6.2.5" />
       <path value="/var/ncc/packages/com.symfony.yaml=6.2.5" />
-      <path value="/var/ncc/packages/com.symfony.filesystem=6.2.5" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />

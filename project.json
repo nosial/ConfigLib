@@ -42,6 +42,9 @@
         "source_path": "src",
         "default_configuration": "release",
         "main": "main",
+        "define_constants": {
+            "version": "%ASSEMBLY.VERSION%"
+        },
         "dependencies": [
             {
                 "name": "net.nosial.optslib",

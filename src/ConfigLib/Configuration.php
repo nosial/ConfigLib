@@ -10,6 +10,7 @@
     use RuntimeException;
     use Symfony\Component\Filesystem\Exception\IOException;
     use Symfony\Component\Filesystem\Filesystem;
+    use Symfony\Component\Yaml\Yaml;
 
     class Configuration
     {
@@ -57,7 +58,6 @@
             // Figure out the path to the configuration file
             try
             {
-                /** @noinspection PhpUndefinedClassInspection */
                 $this->Path = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . $name . '.conf';
             }
             catch (Exception $e)
@@ -232,8 +232,6 @@
         {
             if(!self::validateKey($key))
                 return false;
-            if(!isset($this->Configuration[$key]))
-                return false;
 
             $path = explode('.', $key);
             $current = $this->Configuration;
@@ -281,6 +279,7 @@
             try
             {
                 $fs->dumpFile($this->Path, $json);
+                $fs->chmod($this->Path, 0777);
             }
             catch (IOException $e)
             {
@@ -356,6 +355,11 @@
             return $this->Configuration;
         }
 
+        public function toYaml(): string
+        {
+            return Yaml::dump($this->Configuration, 4, 2);
+        }
+
         /**
          * Public Destructor
          */
@@ -372,5 +376,39 @@
                     Log::error('net.nosial.configlib', sprintf('Unable to save configuration "%s" to disk, %s', $this->Name, $e->getMessage()));
                 }
             }
+        }
+
+        /**
+         * Imports a YAML file into the configuration
+         *
+         * @param string $path
+         * @return void
+         * @throws Exception
+         */
+        public function import(string $path)
+        {
+            $fs = new Filesystem();
+
+            if(!$fs->exists($path))
+                throw new Exception(sprintf('Unable to import configuration file "%s", file does not exist', $path));
+
+            $yaml = file_get_contents($path);
+            $data = Yaml::parse($yaml);
+
+            $this->Configuration = array_replace_recursive($this->Configuration, $data);
+            $this->Modified = true;
+        }
+
+        /**
+         * Exports the configuration to a YAML file
+         *
+         * @param string $path
+         * @return void
+         */
+        public function export(string $path)
+        {
+            $fs = new Filesystem();
+            $fs->dumpFile($path, $this->toYaml());
+            $fs->chmod($path, 0777);
         }
     }
