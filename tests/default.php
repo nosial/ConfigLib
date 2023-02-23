@@ -3,7 +3,7 @@
     require 'ncc';
     import('net.nosial.configlib');
 
-    $config = new \ConfigLib\Configuration('com.symfony.yaml');
+    $config = new \ConfigLib\Configuration('test');
 
     $config->setDefault('database.host', '127.0.0.1');
     $config->setDefault('database.port', 3306);
