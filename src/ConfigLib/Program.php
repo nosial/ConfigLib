@@ -10,6 +10,7 @@
     use ncc\Exceptions\PackageNotFoundException;
     use ncc\Runtime;
     use OptsLib\Parse;
+    use RuntimeException;
     use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Process\Process;
     use Symfony\Component\Yaml\Exception\ParseException;
@@ -27,7 +28,9 @@
             $args = Parse::getArguments();
 
             if(isset($args['help']) || isset($args['h']))
+            {
                 self::help();
+            }
 
             if(isset($args['conf']) || isset($args['config']))
             {
@@ -73,7 +76,9 @@
                 if($export !== null)
                 {
                     if(!is_string($export))
+                    {
                         $export = sprintf('%s.yml', $configuration->getName());
+                    }
 
                     try
                     {
@@ -174,13 +179,11 @@
          * @throws PackageLockException
          * @throws PackageNotFoundException
          */
-        #[NoReturn]  static function edit(array $args, Configuration $configuration): void
+        #[NoReturn] private static function edit(array $args, Configuration $configuration): void
         {
-            $editor = $args['editor'] ?? 'vi';
-            if(isset($args['e']))
-                $editor = $args['e'];
+            $editor = $args['editor'] ?? $args['e'] ?? 'vi';
 
-            if($editor == null)
+            if($editor === null)
             {
                 print('No editor specified' . PHP_EOL);
                 exit(1);
@@ -195,7 +198,10 @@
             {
                 if(!file_exists(Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp'))
                 {
-                    mkdir(Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp', 0777, true);
+                    if (!mkdir($concurrentDirectory = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp', 0777, true) && !is_dir($concurrentDirectory))
+                    {
+                        throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+                    }
 
                     if(!file_exists(Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp'))
                     {
@@ -207,21 +213,15 @@
                 $tempPath = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp';
             }
 
-            if($tempPath == null)
-            {
-                print('Unable to determine the temporary path to use' . PHP_EOL);
-                exit(1);
-            }
-
             $fs = new Filesystem();
-
-            // Convert the configuration from JSON to YAML for editing purposes
-            $tempFile = $tempPath . DIRECTORY_SEPARATOR . bin2hex(random_bytes(16)) . '.yaml';
-            $fs->dumpFile($tempFile, $configuration->toYaml());
-            $original_hash = hash_file('sha1', $tempFile);
 
             try
             {
+                // Convert the configuration from JSON to YAML for editing purposes
+                $tempFile = $tempPath . DIRECTORY_SEPARATOR . bin2hex(random_bytes(16)) . '.yaml';
+                $fs->dumpFile($tempFile, $configuration->toYaml());
+                $original_hash = hash_file('sha1', $tempFile);
+
                 // Open the editor
                 $process = new Process([$editor, $tempFile]);
                 $process->setTimeout(0);
@@ -238,7 +238,7 @@
             if($fs->exists($tempFile))
             {
                 $new_hash = hash_file('sha1', $tempFile);
-                if($original_hash != $new_hash)
+                if($original_hash !== $new_hash)
                 {
                     // Convert the YAML back to JSON
                     $yaml = file_get_contents($tempFile);
@@ -253,15 +253,26 @@
                         exit(1);
                     }
 
-                    $path = $configuration->getPath();
-                    $fs->dumpFile($path, json_encode($json, JSON_PRETTY_PRINT));
+                    try
+                    {
+                        $path = $configuration->getPath();
+                        $fs->dumpFile($path, json_encode($json, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+                    }
+                    catch(Exception $e)
+                    {
+                        print('Unable to save the configuration, ' . $e->getMessage() . PHP_EOL);
+                        exit(1);
+                    }
+
                     print('Configuration updated' . PHP_EOL);
                 }
             }
 
             // Remove the temporary file
             if($fs->exists($tempFile))
+            {
                 $fs->remove($tempFile);
+            }
 
             exit(0);
         }
