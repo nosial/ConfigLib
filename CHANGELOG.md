@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - Unreleased
 
-### Changed
+### Added
  * ConfigurationLib will now attempt to load configuration files from Environment Variables if they are set, for example
    if `com.example.application` wants to load `ExampleConfiguration` it will first check if `CONFIGLIB_EXAMPLECONFIGURATION`
    is set, and if so, load that file instead of the default `example-configuration.yml` file. If the file is not found,
