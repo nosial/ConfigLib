@@ -8,7 +8,6 @@
     use LogLib\Log;
     use ncc\Runtime;
     use RuntimeException;
-    use Symfony\Component\Filesystem\Exception\IOException;
     use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Yaml\Yaml;
 
@@ -19,37 +18,37 @@
          *
          * @var string
          */
-        private $Name;
+        private $name;
 
         /**
          * The path to the configuration file
          *
          * @var string
          */
-        private $Path;
+        private $path;
 
         /**
          * The configuration data
          *
          * @var array
          */
-        private $Configuration;
+        private $configuration;
 
         /**
          * Indicates if the current instance is modified
          *
          * @var bool
          */
-        private $Modified;
+        private $modified;
 
         /**
          * Public Constructor
          *
-         * @param string $name The name  of the configuration (e.g. "MyApp" or "net.example.myapp")
+         * @param string $name The name of the configuration (e.g. "MyApp" or "net.example.myapp")
          */
         public function __construct(string $name='default')
         {
-            // Sanitize $name for file path
+            // Sanitize $name for a file path
             $name = strtolower($name);
             $name = str_replace(array('/', '\\', '.'), '_', $name);
 
@@ -58,7 +57,7 @@
                 $environment_config = sprintf('CONFIGLIB_%s', strtoupper($name));
                 if(file_exists($environment_config))
                 {
-                    $this->Path = $environment_config;
+                    $this->path = $environment_config;
                 }
                 else
                 {
@@ -66,12 +65,12 @@
                 }
             }
 
-            if($this->Path === null)
+            if($this->path === null)
             {
                 // Figure out the path to the configuration file
                 try
                 {
-                    $this->Path = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . $name . '.conf';
+                    $this->path = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . $name . '.conf';
                 }
                 catch (Exception $e)
                 {
@@ -80,12 +79,12 @@
             }
 
             // Set the name
-            $this->Name = $name;
+            $this->name = $name;
 
             // Default Configuration
-            $this->Modified = false;
+            $this->modified = false;
 
-            if(file_exists($this->Path))
+            if(file_exists($this->path))
             {
                 try
                 {
@@ -93,13 +92,13 @@
                 }
                 catch(Exception $e)
                 {
-                    Log::error('net.nosial.configlib', sprintf('Unable to load configuration "%s", %s', $this->Name, $e->getMessage()));
-                    throw new RuntimeException(sprintf('Unable to load configuration "%s"', $this->Name), $e);
+                    Log::error('net.nosial.configlib', sprintf('Unable to load configuration "%s", %s', $this->name, $e->getMessage()));
+                    throw new RuntimeException(sprintf('Unable to load configuration "%s"', $this->name), $e);
                 }
             }
             else
             {
-                $this->Configuration = [];
+                $this->configuration = [];
             }
         }
 
@@ -114,7 +113,9 @@
             $pattern = '/^([a-zA-Z]+\.?)+$/';
 
             if (preg_match($pattern, $input))
+            {
                 return true;
+            }
 
             return false;
         }
@@ -130,11 +131,15 @@
         {
             if (is_numeric($input))
             {
-                if (str_contains($input, '.'))
+                if(str_contains($input, '.'))
+                {
                     return (float)$input;
+                }
 
-                if (ctype_digit($input))
+                if(ctype_digit($input))
+                {
                     return (int)$input;
+                }
             }
             elseif (in_array(strtolower($input), ['true', 'false']))
             {
@@ -155,16 +160,18 @@
         public function get(string $key, mixed $default=null): mixed
         {
             if(!self::validateKey($key))
+            {
                 return $default;
+            }
 
             $path = explode('.', $key);
-            $current = $this->Configuration;
+            $current = $this->configuration;
 
-            foreach ($path as $key)
+            foreach ($path as $key_value)
             {
-                if (is_array($current) && array_key_exists($key, $current))
+                if (is_array($current) && array_key_exists($key_value, $current))
                 {
-                    $current = $current[$key];
+                    $current = $current[$key_value];
                 }
                 else
                 {
@@ -187,36 +194,35 @@
         public function set(string $key, mixed $value, bool $create=false): bool
         {
             if(!self::validateKey($key))
+            {
                 return false;
+            }
 
             $path = explode('.', $key);
-            $current = &$this->Configuration;
+            $current = &$this->configuration;
 
             // Navigate to the parent of the value to set
-            foreach ($path as $key)
+            foreach ($path as $key_value)
             {
-                if (is_array($current) && array_key_exists($key, $current))
+                if (is_array($current) && array_key_exists($key_value, $current))
                 {
-                    $current = &$current[$key];
+                    $current = &$current[$key_value];
+                }
+                elseif($create)
+                {
+                    $current[$key_value] = [];
+                    $current = &$current[$key_value];
                 }
                 else
                 {
-                    if ($create)
-                    {
-                        $current[$key] = [];
-                        $current = &$current[$key];
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return false;
                 }
+
             }
 
-            // Set the value
             $current = $value;
+            $this->modified = true;
 
-            $this->Modified = true;
             return true;
         }
 
@@ -230,7 +236,9 @@
         public function setDefault(string $key, mixed $value): bool
         {
             if($this->exists($key))
+            {
                 return false;
+            }
 
             return $this->set($key, $value, true);
         }
@@ -244,16 +252,18 @@
         public function exists(string $key): bool
         {
             if(!self::validateKey($key))
+            {
                 return false;
+            }
 
             $path = explode('.', $key);
-            $current = $this->Configuration;
+            $current = $this->configuration;
 
-            foreach ($path as $key)
+            foreach ($path as $key_value)
             {
-                if (is_array($current) && array_key_exists($key, $current))
+                if (is_array($current) && array_key_exists($key_value, $current))
                 {
-                    $current = $current[$key];
+                    $current = $current[$key_value];
                 }
                 else
                 {
@@ -272,35 +282,36 @@
          */
         public function clear(): void
         {
-            $this->Configuration = [];
+            $this->configuration = [];
         }
 
         /**
          * Saves the Configuration File to the disk
          *
          * @return void
-         * @throws Exception
          */
         public function save(): void
         {
-            if (!$this->Modified)
+            if (!$this->modified)
+            {
                 return;
-
-            $json = json_encode($this->Configuration, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            $fs = new Filesystem();
+            }
 
             try
             {
-                $fs->dumpFile($this->Path, $json);
-                $fs->chmod($this->Path, 0777);
+                $json = json_encode($this->configuration, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                $fs = new Filesystem();
+
+                $fs->dumpFile($this->path, $json);
+                $fs->chmod($this->path, 0777);
             }
-            catch (IOException $e)
+            catch (Exception $e)
             {
-                throw new Exception('Unable to write configuration file', $e);
+                throw new RuntimeException('Unable to write configuration file', $e);
             }
 
-            $this->Modified = false;
-            Log::debug('net.nosial.configlib', sprintf('Configuration "%s" saved', $this->Name));
+            $this->modified = false;
+            Log::debug('net.nosial.configlib', sprintf('Configuration "%s" saved', $this->name));
         }
 
         /**
@@ -308,44 +319,42 @@
          *
          * @param bool $force
          * @return void
-         * @throws Exception
          * @noinspection PhpUnused
          */
         public function load(bool $force=false): void
         {
-            if (!$force && !$this->Modified)
+            if (!$force && !$this->modified)
+            {
                 return;
+            }
 
             // If the configuration file is a YAML file, import it instead
-            if(str_ends_with($this->Path, '.yaml') || str_ends_with($this->Path, '.yml'))
+            if(str_ends_with($this->path, '.yaml') || str_ends_with($this->path, '.yml'))
             {
-                $this->import($this->Path);
+                $this->import($this->path);
                 return;
             }
 
             $fs = new Filesystem();
 
-            if (!$fs->exists($this->Path))
+            if (!$fs->exists($this->path))
             {
                 return;
             }
 
             try
             {
-                $json = file_get_contents($this->Path);
+                $json = file_get_contents($this->path);
+                $this->configuration = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             }
-            catch (IOException $e)
+            catch (Exception $e)
             {
-                throw new Exception('Unable to read configuration file', $e);
+                throw new RuntimeException('Unable to read configuration file', $e);
             }
 
-            $this->Configuration = json_decode($json, true);
-            $this->Modified = false;
-
-            Log::debug('net.nosial.configlib', 'Loaded configuration file: ' . $this->Path);
+            $this->modified = false;
+            Log::debug('net.nosial.configlib', 'Loaded configuration file: ' . $this->path);
         }
-
-
 
         /**
          * Returns the name of the configuration
@@ -355,7 +364,7 @@
          */
         public function getName(): string
         {
-            return $this->Name;
+            return $this->name;
         }
 
         /**
@@ -365,21 +374,28 @@
          */
         public function getPath(): string
         {
-            return $this->Path;
+            return $this->path;
         }
 
         /**
+         * Returns the configuration
+         *
          * @return array
          * @noinspection PhpUnused
          */
         public function getConfiguration(): array
         {
-            return $this->Configuration;
+            return $this->configuration;
         }
 
+        /**
+         * Returns a formatted yaml string of the current configuration
+         *
+         * @return string
+         */
         public function toYaml(): string
         {
-            return Yaml::dump($this->Configuration, 4, 2);
+            return Yaml::dump($this->configuration, 4, 2);
         }
 
         /**
@@ -387,7 +403,7 @@
          */
         public function __destruct()
         {
-            if($this->Modified)
+            if($this->modified)
             {
                 try
                 {
@@ -395,7 +411,7 @@
                 }
                 catch(Exception $e)
                 {
-                    Log::error('net.nosial.configlib', sprintf('Unable to save configuration "%s" to disk, %s', $this->Name, $e->getMessage()));
+                    Log::error('net.nosial.configlib', sprintf('Unable to save configuration "%s" to disk, %s', $this->name, $e->getMessage()));
                 }
             }
         }
@@ -405,20 +421,21 @@
          *
          * @param string $path
          * @return void
-         * @throws Exception
          */
-        public function import(string $path)
+        public function import(string $path): void
         {
             $fs = new Filesystem();
 
             if(!$fs->exists($path))
-                throw new Exception(sprintf('Unable to import configuration file "%s", file does not exist', $path));
+            {
+                throw new RuntimeException(sprintf('Unable to import configuration file "%s", file does not exist', $path));
+            }
 
             $yaml = file_get_contents($path);
             $data = Yaml::parse($yaml);
 
-            $this->Configuration = array_replace_recursive($this->Configuration, $data);
-            $this->Modified = true;
+            $this->configuration = array_replace_recursive($this->configuration, $data);
+            $this->modified = true;
         }
 
         /**
@@ -427,7 +444,7 @@
          * @param string $path
          * @return void
          */
-        public function export(string $path)
+        public function export(string $path): void
         {
             $fs = new Filesystem();
             $fs->dumpFile($path, $this->toYaml());
