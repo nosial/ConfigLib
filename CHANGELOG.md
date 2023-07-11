@@ -13,8 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    is set, and if so, load that file instead of going through the default process of loading the default configuration file. 
    If the file is not found, it will resort to its default behavior. You can either load an original json configuration
    file which is usually located at `\var\ncc\data\net.nosial.configlib` as one of the .conf files, or you can load a yml
-   which is the same one you usually use to import or edit configurations. But the file extension must be either `.json`,
-   `.yml` or `.yaml`. If you want to load a file from a different location.
+   which is the same one you usually use to import or edit configurations. But the file extension must be either `.yml`
+   or `.yaml` if you want ConfigLib to load it as a yml file, otherwise by default it assumes it is a json file.
 
 
 ## [1.0.0] - 2023-02-23

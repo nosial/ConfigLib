@@ -43,11 +43,6 @@
         private $Modified;
 
         /**
-         * @var bool
-         */
-        private $FromEnvironment;
-
-        /**
          * Public Constructor
          *
          * @param string $name The name  of the configuration (e.g. "MyApp" or "net.example.myapp")
@@ -56,10 +51,7 @@
         {
             // Sanitize $name for file path
             $name = strtolower($name);
-            $name = str_replace('/', '_', $name);
-            $name = str_replace('\\', '_', $name);
-            $name = str_replace('.', '_', $name);
-            $this->FromEnvironment = false;
+            $name = str_replace(array('/', '\\', '.'), '_', $name);
 
             if(!getenv(sprintf("CONFIGLIB_%s", strtoupper($name))))
             {
@@ -67,7 +59,6 @@
                 if(file_exists($environment_config))
                 {
                     $this->Path = $environment_config;
-                    $this->FromEnvironment = true;
                 }
                 else
                 {
