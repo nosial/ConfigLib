@@ -52,7 +52,8 @@
             $name = strtolower($name);
             $name = str_replace(array('/', '\\', '.'), '_', $name);
 
-            if(!getenv(sprintf("CONFIGLIB_%s", strtoupper($name))))
+            $env = getenv(sprintf("CONFIGLIB_%s", strtoupper($name)));
+            if($env !== false)
             {
                 $environment_config = sprintf('CONFIGLIB_%s', strtoupper($name));
                 if(file_exists($environment_config))
