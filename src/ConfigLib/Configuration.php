@@ -43,6 +43,11 @@
         private $Modified;
 
         /**
+         * @var bool
+         */
+        private $FromEnvironment;
+
+        /**
          * Public Constructor
          *
          * @param string $name The name  of the configuration (e.g. "MyApp" or "net.example.myapp")
@@ -54,15 +59,33 @@
             $name = str_replace('/', '_', $name);
             $name = str_replace('\\', '_', $name);
             $name = str_replace('.', '_', $name);
+            $this->FromEnvironment = false;
 
-            // Figure out the path to the configuration file
-            try
+            if(!getenv(sprintf("CONFIGLIB_%s", strtoupper($name))))
             {
-                $this->Path = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . $name . '.conf';
+                $environment_config = sprintf('CONFIGLIB_%s', strtoupper($name));
+                if(file_exists($environment_config))
+                {
+                    $this->Path = $environment_config;
+                    $this->FromEnvironment = true;
+                }
+                else
+                {
+                    Log::warning('net.nosial.configlib', sprintf('Environment variable "%s" points to a non-existent file, resorting to default/builtin configuration', $environment_config));
+                }
             }
-            catch (Exception $e)
+
+            if($this->Path === null)
             {
-                throw new RuntimeException('Unable to load package "net.nosial.configlib"', $e);
+                // Figure out the path to the configuration file
+                try
+                {
+                    $this->Path = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . $name . '.conf';
+                }
+                catch (Exception $e)
+                {
+                    throw new RuntimeException('Unable to load package "net.nosial.configlib"', $e);
+                }
             }
 
             // Set the name
@@ -70,7 +93,6 @@
 
             // Default Configuration
             $this->Modified = false;
-
 
             if(file_exists($this->Path))
             {
@@ -303,10 +325,19 @@
             if (!$force && !$this->Modified)
                 return;
 
+            // If the configuration file is a YAML file, import it instead
+            if(str_ends_with($this->Path, '.yaml') || str_ends_with($this->Path, '.yml'))
+            {
+                $this->import($this->Path);
+                return;
+            }
+
             $fs = new Filesystem();
 
             if (!$fs->exists($this->Path))
+            {
                 return;
+            }
 
             try
             {
