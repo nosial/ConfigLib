@@ -33,11 +33,15 @@ build:
         - if: $CI_COMMIT_BRANCH
 
 release:
-    stage: deploy
-    script:
-        - ncc build --config release --log-level debug
-    artifacts:
-        paths:
-            - build/
-    rules:
-        - if: $CI_COMMIT_TAG
+  stage: deploy
+  script:
+    - ncc build --config release --log-level debug
+    - >
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" 
+           --upload-file build/release/net.nosial.configlib.ncc 
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/net.nosial.focuscrawler/$CI_COMMIT_TAG/net.nosial.configlib.ncc"
+  artifacts:
+    paths:
+      - build/
+  rules:
+    - if: $CI_COMMIT_TAG
