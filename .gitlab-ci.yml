@@ -37,9 +37,7 @@ release:
   script:
     - ncc build --config release --log-level debug
     - >
-      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" 
-           --upload-file build/release/net.nosial.configlib.ncc 
-           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/net.nosial.focuscrawler/$CI_COMMIT_TAG/net.nosial.configlib.ncc"
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/release/net.nosial.configlib.ncc "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/net.nosial.configlib/$CI_COMMIT_REF_NAME/net.nosial.configlib.ncc"
   artifacts:
     paths:
       - build/
