@@ -55,10 +55,9 @@
             $env = getenv(sprintf("CONFIGLIB_%s", strtoupper($name)));
             if($env !== false)
             {
-                $environment_config = sprintf('CONFIGLIB_%s', strtoupper($name));
-                if(file_exists($environment_config))
+                if(file_exists($env))
                 {
-                    $this->path = $environment_config;
+                    $this->path = $env;
                 }
                 else
                 {
