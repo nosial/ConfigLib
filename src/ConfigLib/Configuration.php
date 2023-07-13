@@ -328,14 +328,22 @@
                 return;
             }
 
+            $fs = new Filesystem();
+
             // If the configuration file is a YAML file, import it instead
             if(str_ends_with($this->path, '.yaml') || str_ends_with($this->path, '.yml'))
             {
-                $this->import($this->path);
+
+                if(!$fs->exists($this->path))
+                {
+                    throw new RuntimeException(sprintf('Unable to import configuration file "%s" from environment, file does not exist', $path));
+                }
+
+                $yaml = file_get_contents($this->path);
+                $this->configuration = Yaml::parse($yaml);
+
                 return;
             }
-
-            $fs = new Filesystem();
 
             if (!$fs->exists($this->path))
             {
