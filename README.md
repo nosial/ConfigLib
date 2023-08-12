@@ -1,15 +1,12 @@
 # ConfigLib
 
-ConfigLib is a PHP library for managing configuration files and storing it
-in NCC's data, while providing a command line interface for running functions
-such as editing configuration files inline or importing/exporting 
-configuration files.
+ConfigLib is a PHP library for managing configuration files and storing it  in NCC's data, while providing a command
+line interface for running functions such as editing configuration files inline or importing/exporting configuration
+files.
 
-One of the biggest advantages of using something like ConfigLib is that 
-it will allow for more complicated software to be configured more easily
-by following the documented instructions on how to alter configuration
-files, optionally you could use a builtin editor to edit the configuration
-file manually.
+One of the biggest advantages of using something like ConfigLib is that it will allow for more complicated software to
+be configured more easily by following the documented instructions on how to alter configuration files, optionally you
+could use a builtin editor to edit the configuration file manually.
 
 
 ## Table of contents
@@ -131,6 +128,8 @@ The command line interface can be executed by running `configlib` from the comma
 
 For the rest of this documentation, we will assume that you have the `configlib` command in your global path.
 
+
+
 ### Exporting a configuration file
 
 To export a configuration file, run the following command:
@@ -143,6 +142,8 @@ Exported configuration files are stored as YAML files.
 
  > Note: if the filename is not specified, the configuration file will be exported to the current working directory with the name `<config_name>.yaml`
 
+
+
 ### Importing a configuration file
 
 To import a configuration file, you must specify a valid yaml file, run the following command:
@@ -150,6 +151,8 @@ To import a configuration file, you must specify a valid yaml file, run the foll
 ```bash
 configlib --config <config_name> --import <filename>
 ```
+
+
 
 ### Editing a configuration file
 
@@ -197,6 +200,37 @@ To edit a property, specify both the `--property` and `--value` options:
 ```bash
 configlib --config <config_name> --property database.username --value root
 ```
+
+
+### Environment Variables
+
+ConfigLib can be interacted with using environment variables with two functions
+
+ - Import a YAML file
+ - Override configuration values
+
+#### Importing a YAML file
+
+You can tell ConfigLib to load a YAML file by setting the `CONFIGLIB_<CONFIG_NAME>` environment variable with the path
+to the YAML file as the value, for example:
+
+```bash
+export CONFIGLIB_MYCONFIG=/path/to/myconfig.yaml
+```
+
+#### Overriding configuration values
+
+If loading an entire YAML file is too much, you can override specific configuration values by setting the environment
+variable `CONFIGLIB_<CONFIG_NAME>_<PROPERTY_NAME>` with the value you want to set, for example:
+
+```bash
+export CONFIGLIB_MYCONFIG_DATABASE_USERNAME=root
+```
+
+This would override the `database.username` property in the `myconfig` configuration file even if the property is
+already set, the environment variable will take precedence.
+
+
 
 ## License
 
