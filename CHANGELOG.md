@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This update introduces minor improvements
 
+### Fixed
+ - Corrected a few lines of code in regards to missing variable definitions
+
 
 
 ## [1.0.3] - 2023-07-13

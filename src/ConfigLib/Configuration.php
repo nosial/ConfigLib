@@ -61,7 +61,7 @@
                 }
                 else
                 {
-                    Log::warning('net.nosial.configlib', sprintf('Environment variable "%s" points to a non-existent file, resorting to default/builtin configuration', $environment_config));
+                    Log::warning('net.nosial.configlib', sprintf('Environment variable "%s" points to a non-existent file, resorting to default/builtin configuration', $env));
                 }
             }
 
@@ -336,7 +336,7 @@
 
                 if(!$fs->exists($this->path))
                 {
-                    throw new RuntimeException(sprintf('Unable to import configuration file "%s" from environment, file does not exist', $path));
+                    throw new RuntimeException(sprintf('Unable to import configuration file "%s" from environment, file does not exist', $this->path));
                 }
 
                 $yaml = file_get_contents($this->path);
