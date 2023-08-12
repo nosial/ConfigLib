@@ -27,6 +27,9 @@ could use a builtin editor to edit the configuration file manually.
     * [Editing a configuration file](#editing-a-configuration-file)
       * [Using an external editor](#using-an-external-editor)
       * [Inline command line editor](#inline-command-line-editor)
+    * [Environment Variables](#environment-variables)
+      * [Importing a YAML file](#importing-a-yaml-file)
+      * [Overriding configuration values](#overriding-configuration-values)
   * [License](#license)
 <!-- TOC -->
 
