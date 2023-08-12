@@ -360,6 +360,38 @@
                 throw new RuntimeException('Unable to read configuration file', $e);
             }
 
+            $prefix = 'CONFIGLIB_' . strtoupper($this->name) . '_';
+
+            foreach (getenv() as $key => $value)
+            {
+                if (str_starts_with($key, $prefix))
+                {
+                    // Remove the prefix and split the rest of the key into parts
+                    $path = explode('_', str_replace($prefix, '', $key));
+                    $current = &$this->configuration;
+
+                    // Navigate to the parent of the value to set, except for the last part
+                    foreach ($path as $index => $key_value)
+                    {
+                        $key_value = strtolower($key_value); // Convert to lowercase if needed
+
+                        if ($index < count($path) - 1)
+                        {
+                            if (!is_array($current) || !array_key_exists($key_value, $current))
+                            {
+                                $current[$key_value] = [];
+                            }
+                            $current = &$current[$key_value];
+                        }
+                        else
+                        {
+                            // Set the value for the last part of the path
+                            $current[$key_value] = $value;
+                        }
+                    }
+                }
+            }
+
             $this->modified = false;
             Log::debug('net.nosial.configlib', 'Loaded configuration file: ' . $this->path);
         }

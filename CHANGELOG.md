@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This update introduces minor improvements
 
+### Added
+ - Added the ability to override configuration properties with environment variables using the format
+   `CONFIGLIB_<CONFIG_NAME>_<PROPERTY_NAME>`
+
 ### Fixed
  - Corrected a few lines of code in regards to missing variable definitions
 
