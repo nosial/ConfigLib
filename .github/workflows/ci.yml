@@ -73,7 +73,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ncc-build
-          path: build/release/net.nosial.configlib.ncc
+          path: ncc-build  # Adjust this to download the artifact directly under 'ncc-build'
 
       - name: Install dependencies
         run: |
@@ -108,7 +108,7 @@ jobs:
 
       - name: Install NCC package
         run: |
-          ncc package install --package="build/release/net.nosial.configlib.ncc" --skip-dependencies --reinstall -y --log-level
+          ncc package install --package="ncc-build/net.nosial.configlib.ncc" --skip-dependencies --reinstall -y --log-level  # Use the correct path to the downloaded package
 
       - name: Install project dependencies
         run: |
