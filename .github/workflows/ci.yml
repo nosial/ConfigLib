@@ -77,18 +77,10 @@ jobs:
           name: ncc-build
           path: ncc-build
 
-      - name: Upload release artifact to GitHub
-        run: |
-          BUILD_FILE="ncc-build/net.nosial.configlib.ncc"
-          if [ -f "$BUILD_FILE" ]; then
-            echo "Uploading build artifact to GitHub release"
-            curl \
-              -X POST \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary @"$BUILD_FILE" \
-              "$GITHUB_API_URL/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets?name=$(basename $BUILD_FILE)"
-          else
-            echo "Build artifact not found"
-            exit 1
-          fi
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ncc-build/net.nosial.configlib.ncc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
