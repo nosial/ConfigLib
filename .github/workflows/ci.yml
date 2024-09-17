@@ -3,10 +3,9 @@ name: CI
 on:
   push:
     branches:
-      - '*'
-  pull_request:
-    branches:
-      - '*'
+      - 'main'
+  release:
+    types: [created]
   workflow_dispatch:
 
 jobs:
@@ -17,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -55,23 +54,16 @@ jobs:
         run: |
           ncc build --config release --log-level debug
 
-      - name: Upload artifacts
-        if: github.ref != 'refs/heads/main'
-        uses: actions/upload-artifact@v3
-        with:
-          name: build
-          path: build/
-
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     container:
       image: php:8.3
+    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -83,19 +75,37 @@ jobs:
           git clone https://git.n64.cc/nosial/ncc.git
           cd ncc
           make redist
-          php build/src/INSTALL --auto --install-composer
+          # Find the dynamically generated NCC directory
+          NCC_DIR=$(find build/ -type d -name "ncc_*" | head -n 1)
+          if [ -z "$NCC_DIR" ]; then
+            echo "NCC build directory not found"
+            exit 1
+          fi
+          php "$NCC_DIR/INSTALL" --auto --install-composer
           cd .. && rm -rf ncc
 
       - name: Build project for release
         run: |
           ncc build --config release --log-level debug
 
-      - name: Upload release artifact
+      - name: Upload release artifact to GitHub
         run: |
-          curl --header "JOB-TOKEN: ${{ secrets.GITHUB_TOKEN }}" --upload-file build/release/net.nosial.configlib.ncc "$GITHUB_SERVER_URL/${{ github.repository }}/releases/${{ github.ref_name }}/net.nosial.configlib.ncc"
+          BUILD_FILE="build/release/net.nosial.configlib.ncc"
+          if [ -f "$BUILD_FILE" ]; then
+            echo "Uploading build artifact to GitHub release"
+            curl \
+              -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/zip" \
+              --data-binary @"$BUILD_FILE" \
+              "$GITHUB_API_URL/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets?name=$(basename $BUILD_FILE)"
+          else
+            echo "Build artifact not found"
+            exit 1
+          fi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build
           path: build/
