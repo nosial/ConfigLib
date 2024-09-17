@@ -54,7 +54,14 @@ jobs:
         run: |
           ncc build --config release --log-level debug
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ncc-build
+          path: build/
+
   release:
+    needs: build
     runs-on: ubuntu-latest
     container:
       image: php:8.3
@@ -64,28 +71,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          apt update -yqq
-          apt install git libpq-dev libzip-dev zip make wget gnupg -yqq
-
-      - name: Install latest version of NCC
-        run: |
-          git clone https://git.n64.cc/nosial/ncc.git
-          cd ncc
-          make redist
-          # Find the dynamically generated NCC directory
-          NCC_DIR=$(find build/ -type d -name "ncc_*" | head -n 1)
-          if [ -z "$NCC_DIR" ]; then
-            echo "NCC build directory not found"
-            exit 1
-          fi
-          php "$NCC_DIR/INSTALL" --auto --install-composer
-          cd .. && rm -rf ncc
-
-      - name: Build project for release
-        run: |
-          ncc build --config release --log-level debug
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ncc-build
 
       - name: Upload release artifact to GitHub
         run: |
