@@ -1,19 +1,20 @@
-image: php:8.3
+image: php:8.1
 
 before_script:
     # Install some stuff that the image doesn't come with
     - apt update -yqq
     - apt install git libpq-dev libzip-dev zip make wget gnupg -yqq
 
-    # Add the Debian sid repository and its key
-    - echo "deb http://deb.debian.org/debian sid main" | tee /etc/apt/sources.list.d/debian-sid.list
-    - wget -O - https://ftp-master.debian.org/keys/archive-key-12.asc | apt-key add -
+    # Install phive
+    - wget -O phive.phar https://phar.io/releases/phive.phar
+    - wget -O phive.phar.asc https://phar.io/releases/phive.phar.asc
+    - gpg --keyserver hkps://keys.openpgp.org --recv-keys 0x9D8A98B29B2D5D79
+    - gpg --verify phive.phar.asc phive.phar
+    - chmod +x phive.phar
+    - mv phive.phar /usr/local/bin/phive
 
-    # Update the package list to include the new repository
-    - apt-get update -yqq
-
-    # Install phpab
-    - apt-get install -yqq phpab
+    # Install phab
+    - phive install phpab --global --trust-gpg-keys 0x2A8299CE842DD38C
 
     # Install the latest version of ncc (Nosial Code Compiler)
     - git clone https://git.n64.cc/nosial/ncc.git
