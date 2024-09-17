@@ -6,7 +6,6 @@
 
     use Exception;
     use LogLib\Log;
-    use ncc\Runtime;
     use RuntimeException;
     use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Yaml\Yaml;
@@ -65,17 +64,69 @@
                 }
             }
 
-            if($this->path === null)
+            if ($this->path === null)
             {
-                // Figure out the path to the configuration file
-                try
+                $filePath = $name . '.conf';
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
                 {
-                    $this->path = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . $name . '.conf';
+                    $configDir = getenv('APPDATA') ?: getenv('LOCALAPPDATA');
+
+                    if (!$configDir)
+                    {
+                        // Fallback to system temporary directory
+                        $configDir = sys_get_temp_dir();
+                    }
+
+                    $configDir .= DIRECTORY_SEPARATOR . 'ConfigLib';
                 }
-                catch (Exception $e)
+                else
                 {
-                    throw new RuntimeException('Unable to load package "net.nosial.configlib"', $e);
+                    $homeDir = getenv('HOME') ?: '';
+                    $configDirs = [];
+
+                    if ($homeDir)
+                    {
+                        $configDirs[] = $homeDir . DIRECTORY_SEPARATOR . '.configlib';
+                        $configDirs[] = $homeDir . DIRECTORY_SEPARATOR . '.config' . DIRECTORY_SEPARATOR . 'configlib';
+                    }
+
+                    $configDirs[] = '/etc/configlib';
+                    $configDirs[] = '/var/lib/configlib';
+
+                    $configDir = null;
+
+                    // Iterate over the list of directories and select the first one that can be created or written to
+                    foreach ($configDirs as $dir)
+                    {
+                        if (file_exists($dir) && is_writable($dir))
+                        {
+                            $configDir = $dir;
+                            break;
+                        }
+                        elseif (!file_exists($dir) && mkdir($dir, 0755, true))
+                        {
+                            $configDir = $dir;
+                            break;
+                        }
+                    }
+
+                    if (!$configDir)
+                    {
+                        Log::warning('net.nosial.configlib', sprintf('Unable to find a proper directory to store configuration paths in, using temporary directory instead: %s', sys_get_temp_dir()));
+                        $configDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'configlib';
+                    }
                 }
+
+                // Ensure the directory exists
+                if (!file_exists($configDir))
+                {
+                    if (!mkdir($configDir, 0755, true) && !is_dir($configDir))
+                    {
+                        throw new RuntimeException(sprintf('Directory "%s" was not created', $configDir));
+                    }
+                }
+
+                $this->path = $configDir . DIRECTORY_SEPARATOR . $filePath;
             }
 
             // Set the name
@@ -105,12 +156,12 @@
         /**
          * Validates a key syntax (e.g. "key1.key2.key3")
          *
-         * @param string $input
-         * @return bool
+         * @param string $input The key to validate
+         * @return bool True if the key is valid, false otherwise
          */
         private static function validateKey(string $input): bool
         {
-            $pattern = '/^([a-zA-Z]+\.?)+$/';
+            $pattern = '/^([a-zA-Z0-9]+\.?)+$/';
 
             if (preg_match($pattern, $input))
             {
@@ -121,35 +172,6 @@
         }
 
         /**
-         * Attempts to convert a string to the correct type (int, float, bool, string)
-         *
-         * @param $input
-         * @return float|int|mixed|string
-         * @noinspection PhpUnusedPrivateMethodInspection
-         */
-        private static function cast($input): mixed
-        {
-            if (is_numeric($input))
-            {
-                if(str_contains($input, '.'))
-                {
-                    return (float)$input;
-                }
-
-                if(ctype_digit($input))
-                {
-                    return (int)$input;
-                }
-            }
-            elseif (in_array(strtolower($input), ['true', 'false']))
-            {
-                return filter_var($input, FILTER_VALIDATE_BOOLEAN);
-            }
-
-            return (string)$input;
-        }
-
-        /**
          * Returns a value from the configuration
          *
          * @param string $key The key to retrieve (e.g. "key1.key2.key3")
@@ -157,9 +179,9 @@
          * @return mixed The value of the key or the default value
          * @noinspection PhpUnused
          */
-        public function get(string $key, mixed $default=null): mixed
+        public function get(string $key, mixed $default = null): mixed
         {
-            if(!self::validateKey($key))
+            if (!self::validateKey($key))
             {
                 return $default;
             }
@@ -179,8 +201,8 @@
                 }
             }
 
-            // Return the value at the end of the path
-            return $current;
+            // Return the value at the end of the path, or the default if the value is null
+            return $current ?? $default;
         }
 
         /**
@@ -191,9 +213,10 @@
          * @param bool $create If true, the key will be created if it does not exist
          * @return bool True if the value was set, false otherwise
          */
-        public function set(string $key, mixed $value, bool $create=false): bool
+        public function set(string $key, mixed $value, bool $create = false): bool
         {
-            if(!self::validateKey($key))
+            // Validate the provided key
+            if (!self::validateKey($key))
             {
                 return false;
             }
@@ -201,27 +224,61 @@
             $path = explode('.', $key);
             $current = &$this->configuration;
 
-            // Navigate to the parent of the value to set
-            foreach ($path as $key_value)
+            foreach ($path as $keyPart)
             {
-                if (is_array($current) && array_key_exists($key_value, $current))
+                if (!is_array($current))
                 {
-                    $current = &$current[$key_value];
+                    $current = [];
                 }
-                elseif($create)
+
+                if (!array_key_exists($keyPart, $current))
                 {
-                    $current[$key_value] = [];
-                    $current = &$current[$key_value];
+                    if ($create)
+                    {
+                        $current[$keyPart] = [];
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                $current = &$current[$keyPart];
+            }
+
+            $current = $value;
+            $this->modified = true;
+            return true;
+        }
+
+        /**
+         * Checks if a configuration key exists
+         *
+         * @param string $key The key to check (e.g. "key1.key2.key3")
+         * @return bool True if the key exists, false otherwise
+         */
+        public function exists(string $key): bool
+        {
+            // Validate the provided key
+            if (!self::validateKey($key))
+            {
+                return false;
+            }
+
+            $path = explode('.', $key);
+            $current = $this->configuration;
+
+            foreach ($path as $keyPart)
+            {
+                if (is_array($current) && array_key_exists($keyPart, $current))
+                {
+                    $current = $current[$keyPart];
                 }
                 else
                 {
                     return false;
                 }
-
             }
-
-            $current = $value;
-            $this->modified = true;
 
             return true;
         }
@@ -229,9 +286,9 @@
         /**
          * Sets the default value for a key if it does not exist
          *
-         * @param string $key
-         * @param mixed $value
-         * @return bool
+         * @param string $key The key to set (e.g. "key1.key2.key3")
+         * @param mixed $value The value to set
+         * @return bool True if the value was set, false otherwise
          */
         public function setDefault(string $key, mixed $value): bool
         {
@@ -243,42 +300,11 @@
             return $this->set($key, $value, true);
         }
 
-        /**
-         * Checks if the given key exists in the configuration
-         *
-         * @param string $key
-         * @return bool
-         */
-        public function exists(string $key): bool
-        {
-            if(!self::validateKey($key))
-            {
-                return false;
-            }
-
-            $path = explode('.', $key);
-            $current = $this->configuration;
-
-            foreach ($path as $key_value)
-            {
-                if (is_array($current) && array_key_exists($key_value, $current))
-                {
-                    $current = $current[$key_value];
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
 
         /**
          * Clears the current configuration data
          *
          * @return void
-         * @noinspection PhpUnused
          */
         public function clear(): void
         {
@@ -317,9 +343,8 @@
         /**
          * Loads the Configuration File from the disk
          *
-         * @param bool $force
+         * @param bool $force If true, the configuration will be reloaded even if it was not modified
          * @return void
-         * @noinspection PhpUnused
          */
         public function load(bool $force=false): void
         {
@@ -381,6 +406,7 @@
                             {
                                 $current[$key_value] = [];
                             }
+
                             $current = &$current[$key_value];
                         }
                         else
@@ -399,7 +425,7 @@
         /**
          * Returns the name of the configuration
          *
-         * @return string
+         * @return string The name of the configuration
          * @noinspection PhpUnused
          */
         public function getName(): string
@@ -410,7 +436,7 @@
         /**
          * Returns the path of the configuration file on disk
          *
-         * @return string
+         * @return string The path of the configuration file
          */
         public function getPath(): string
         {
@@ -420,7 +446,7 @@
         /**
          * Returns the configuration
          *
-         * @return array
+         * @return array The configuration
          * @noinspection PhpUnused
          */
         public function getConfiguration(): array
@@ -431,11 +457,11 @@
         /**
          * Returns a formatted yaml string of the current configuration
          *
-         * @return string
+         * @return string The configuration in YAML format
          */
         public function toYaml(): string
         {
-            return Yaml::dump($this->configuration, 4, 2);
+            return Yaml::dump($this->configuration, 4);
         }
 
         /**
@@ -459,7 +485,7 @@
         /**
          * Imports a YAML file into the configuration
          *
-         * @param string $path
+         * @param string $path The path to the YAML file
          * @return void
          */
         public function import(string $path): void
@@ -481,7 +507,7 @@
         /**
          * Exports the configuration to a YAML file
          *
-         * @param string $path
+         * @param string $path The path to export the configuration to
          * @return void
          */
         public function export(string $path): void
