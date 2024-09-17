@@ -113,10 +113,6 @@ jobs:
         run: |
           ncc package install --package="ncc-build/net.nosial.configlib.ncc" --reinstall -y --log-level debug
 
-      - name: Install project dependencies
-        run: |
-          composer install
-
       - name: Run PHPUnit tests
         run: |
           ./vendor/bin/phpunit --configuration phpunit.xml
