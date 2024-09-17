@@ -84,8 +84,8 @@ jobs:
             echo "Uploading build artifact to GitHub release"
             curl \
               -X POST \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/zip" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/octet-stream" \
               --data-binary @"$BUILD_FILE" \
               "$GITHUB_API_URL/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets?name=$(basename $BUILD_FILE)"
           else
