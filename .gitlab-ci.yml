@@ -5,8 +5,15 @@ before_script:
     - apt update -yqq
     - apt install git libpq-dev libzip-dev zip make wget gnupg -yqq
 
-    # Install phab
-    - apt install phpab
+    # Add the Debian sid repository and its key
+    - echo "deb http://deb.debian.org/debian sid main" | tee /etc/apt/sources.list.d/debian-sid.list
+    - wget -O - https://ftp-master.debian.org/keys/archive-key-12.asc | apt-key add -
+
+    # Update the package list to include the new repository
+    - apt-get update -yqq
+
+    # Install phpab
+    - apt-get install -yqq phpab
 
     # Install the latest version of ncc (Nosial Code Compiler)
     - git clone https://git.n64.cc/nosial/ncc.git
