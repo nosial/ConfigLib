@@ -1,4 +1,4 @@
-image: php:8.1
+image: php:8.3
 
 before_script:
     # Install some stuff that the image doesn't come with
