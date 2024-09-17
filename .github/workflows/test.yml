@@ -10,10 +10,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Reference the reusable workflow at the job level
-    uses: nosial/ncc-workflow/.github/workflows/build.yml@main
-    with:
-      ncc_package_path: build/release/net.nosial.configlib.ncc
+    # Reference the reusable workflow at the top level of the job
+    ncc-setup:
+      uses: nosial/ncc-workflow/.github/workflows/build.yml@main
+      with:
+        ncc_package_path: build/release/net.nosial.configlib.ncc
 
   test:
     needs: build
@@ -29,11 +30,11 @@ jobs:
           name: ncc-build
           path: ncc-build
 
-      # Reuse the NCC workflow for the test phase
-    uses: nosial/ncc-workflow/.github/workflows/build.yml@main
-    with:
-      ncc_package_path: ncc-build/net.nosial.configlib.ncc
-
+    # Reuse the NCC workflow for the test phase
+    ncc-setup:
+      uses: nosial/ncc-workflow/.github/workflows/build.yml@main
+      with:
+        ncc_package_path: ncc-build/net.nosial.configlib.ncc
       - name: Run PHPUnit tests
         run: |
           wget https://phar.phpunit.de/phpunit-11.3.phar
