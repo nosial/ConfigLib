@@ -4,6 +4,9 @@ before_script:
     # Install some stuff that the image doesn't come with
     - apt update -yqq
     - apt install git libpq-dev libzip-dev zip make wget gnupg -yqq
+    - curl -sSLf -o /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
+    - chmod +x /usr/local/bin/install-php-extensions
+    - install-php-extensions zip
 
     # Install phive
     - wget -O phive.phar https://phar.io/releases/phive.phar
@@ -20,7 +23,13 @@ before_script:
     - git clone https://git.n64.cc/nosial/ncc.git
     - cd ncc
     - make redist
-    - php build/src/INSTALL --auto --install-composer
+    - NCC_DIR=$(find build/ -type d -name "ncc_*" | head -n 1)
+    - |
+      if [ -z "$NCC_DIR" ]; then
+        echo "NCC build directory not found"
+        exit 1
+      fi
+    - php "$NCC_DIR/INSTALL" --auto --install-composer
     - cd .. && rm -rf ncc
 
 build:
