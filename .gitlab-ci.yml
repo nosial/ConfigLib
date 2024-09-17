@@ -44,7 +44,7 @@ build:
 test:
     stage: test
     script:
-        - ncc package install --package="build/net.nosial.configlib.ncc" --reinstall -y --log-level debug
+        - ncc package install --package="build/release/net.nosial.configlib.ncc" --reinstall -y --log-level debug
 
         - wget https://phar.phpunit.de/phpunit-11.3.phar
         - php phpunit-11.3.phar --configuration phpunit.xml
