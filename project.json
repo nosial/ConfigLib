@@ -35,7 +35,7 @@
         "company": "Nosial",
         "copyright": "Copyright (c) 2022-2023 Nosial",
         "description": "ConfigLib is a library for reading and writing configuration files via the NCC Runtime API",
-        "version": "1.0.4",
+        "version": "1.1.0",
         "uuid": "9347259e-8e4d-11ed-85a7-fd07cf28ef35"
     },
     "build": {
@@ -78,9 +78,18 @@
             }
         ],
         "configurations": [
-            {
+	    {
                 "name": "release",
-                "output_path": "build/release"
+                "build_type": "ncc",
+                "output": "build/release/%ASSEMBLY.PACKAGE%.ncc"
+            },
+            {
+                "name": "debug",
+                "build_type": "ncc",
+                "output": "build/debug/%ASSEMBLY.PACKAGE%.ncc",
+                "define_constants": {
+                    "DEBUG": "1"
+                }
             }
         ]
     }
