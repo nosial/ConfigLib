@@ -33,6 +33,7 @@ before_script:
     - cd .. && rm -rf ncc
 
 build:
+    stage: build
     script:
         - ncc build --config release --log-level debug
     artifacts:
@@ -41,6 +42,7 @@ build:
     rules:
         - if: $CI_COMMIT_BRANCH
 test:
+    stage: test
     script:
         - ncc package install --package="build/net.nosial.configlib.ncc" --reinstall -y --log-level debug
 
