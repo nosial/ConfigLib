@@ -108,7 +108,7 @@ jobs:
 
       - name: Install NCC package
         run: |
-          ncc package install --package="ncc-build/net.nosial.configlib.ncc" --skip-dependencies --reinstall -y --log-level  # Use the correct path to the downloaded package
+          ncc package install --package="ncc-build/net.nosial.configlib.ncc" --reinstall -y --log-level  # Use the correct path to the downloaded package
 
       - name: Install project dependencies
         run: |
