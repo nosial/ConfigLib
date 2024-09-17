@@ -75,7 +75,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ncc-build
-          path: ncc-build
+
+      - name: Get the release upload URL
+        id: get_release
+        run: |
+          release_id=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "$GITHUB_API_URL/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }}" \
+            | jq -r '.upload_url' | sed -e "s/{?name,label}//")
+          echo "::set-output name=upload_url::$release_id"
 
       - name: Upload release artifact to GitHub
         run: |
@@ -87,7 +95,7 @@ jobs:
               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               -H "Content-Type: application/octet-stream" \
               --data-binary @"$BUILD_FILE" \
-              "$GITHUB_API_URL/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets?name=$(basename $BUILD_FILE)"
+              "${{ steps.get_release.outputs.upload_url }}?name=$(basename $BUILD_FILE)"
           else
             echo "Build artifact not found"
             exit 1
