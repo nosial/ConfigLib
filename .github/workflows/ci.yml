@@ -42,7 +42,13 @@ jobs:
           git clone https://git.n64.cc/nosial/ncc.git
           cd ncc
           make redist
-          php build/src/INSTALL --auto --install-composer
+          # Find the dynamically generated NCC directory
+          NCC_DIR=$(find build/ -type d -name "ncc_*" | head -n 1)
+          if [ -z "$NCC_DIR" ]; then
+            echo "NCC build directory not found"
+            exit 1
+          fi
+          php "$NCC_DIR/INSTALL" --auto --install-composer
           cd .. && rm -rf ncc
 
       - name: Build project
