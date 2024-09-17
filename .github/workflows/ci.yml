@@ -106,9 +106,9 @@ jobs:
           php "$NCC_DIR/INSTALL" --auto --install-composer
           cd .. && rm -rf ncc
 
-      - name: Install NCC package
+      - name: Install NCC packages
         run: |
-          ncc package install --package="ncc-build/net.nosial.configlib.ncc" --reinstall -y --log-level  # Use the correct path to the downloaded package
+          ncc package install --package="ncc-build/net.nosial.configlib.ncc" --reinstall -y --log-level debug
 
       - name: Install project dependencies
         run: |

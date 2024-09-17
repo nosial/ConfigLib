@@ -62,19 +62,19 @@
                 "name": "com.symfony.filesystem",
                 "version": "latest",
                 "source_type": "remote",
-                "source": "symfony/filesystem=latest@composer"
+                "source": "symfony/filesystem=latest@packagist"
             },
             {
                 "name": "com.symfony.yaml",
                 "version": "latest",
                 "source_type": "remote",
-                "source": "symfony/yaml=latest@composer"
+                "source": "symfony/yaml=latest@packagist"
             },
             {
                 "name": "com.symfony.process",
                 "version": "latest",
                 "source_type": "remote",
-                "source": "symfony/process=latest@composer"
+                "source": "symfony/process=latest@packagist"
             }
         ],
         "configurations": [
