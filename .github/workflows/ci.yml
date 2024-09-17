@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ncc-build
-          path: build/
+          path: build/release/net.nosial.configlib.ncc
 
   release:
     needs: build
@@ -75,10 +75,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ncc-build
+          path: ncc-build
 
       - name: Upload release artifact to GitHub
         run: |
-          BUILD_FILE="build/release/net.nosial.configlib.ncc"
+          BUILD_FILE="ncc-build/net.nosial.configlib.ncc"
           if [ -f "$BUILD_FILE" ]; then
             echo "Uploading build artifact to GitHub release"
             curl \
