@@ -115,7 +115,8 @@ jobs:
 
       - name: Run PHPUnit tests
         run: |
-          ./vendor/bin/phpunit --configuration phpunit.xml
+          wget https://phar.phpunit.de/phpunit-11.3.phar
+          php phpunit-11.3.phar --configuration phpunit.xml
 
   release:
     needs: [build, test]
