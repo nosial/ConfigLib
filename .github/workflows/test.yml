@@ -4,16 +4,9 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup NCC
-        uses: nosial/ncc-workflow/.github/workflows/build.yml@main
-        with:
-          ncc_package_path: build/release/net.nosial.configlib.ncc
+    uses: nosial/ncc-workflow/.github/workflows/build.yml@main
+    with:
+      ncc_package_path: build/release/net.nosial.configlib.ncc
 
   test:
     needs: build
