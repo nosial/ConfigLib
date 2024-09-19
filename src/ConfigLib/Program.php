@@ -4,20 +4,18 @@
 
     use Exception;
     use JetBrains\PhpStorm\NoReturn;
-    use ncc\Exceptions\InvalidPackageNameException;
-    use ncc\Exceptions\InvalidScopeException;
-    use ncc\Exceptions\PackageLockException;
-    use ncc\Exceptions\PackageNotFoundException;
-    use ncc\Runtime;
     use OptsLib\Parse;
     use RuntimeException;
     use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Process\Process;
     use Symfony\Component\Yaml\Exception\ParseException;
     use Symfony\Component\Yaml\Yaml;
+    use function trigger_error;
 
     class Program
     {
+        private static ?string $version = null;
+
         /**
          * Main entry point of the program
          *
@@ -145,7 +143,7 @@
          */
         #[NoReturn] private static function help(): void
         {
-            print('ConfigLib v' . Runtime::getConstant('net.nosial.configlib', 'version') . PHP_EOL . PHP_EOL);
+            print('ConfigLib v' . self::getVersion() . PHP_EOL . PHP_EOL);
 
             print('Usage: configlib [options]' . PHP_EOL);
             print('  -h, --help                        Displays the help menu' . PHP_EOL);
@@ -174,10 +172,6 @@
          * @param array $args
          * @param Configuration $configuration
          * @return void
-         * @throws InvalidPackageNameException
-         * @throws InvalidScopeException
-         * @throws PackageLockException
-         * @throws PackageNotFoundException
          */
         #[NoReturn] private static function edit(array $args, Configuration $configuration): void
         {
@@ -196,21 +190,22 @@
             }
             else
             {
-                if(!file_exists(Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp'))
+                $temporary_directory = sys_get_temp_dir();
+                if(!file_exists($temporary_directory . DIRECTORY_SEPARATOR . 'configlib'))
                 {
-                    if (!mkdir($concurrentDirectory = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp', 0777, true) && !is_dir($concurrentDirectory))
+                    if (!mkdir($concurrentDirectory = $temporary_directory . DIRECTORY_SEPARATOR . 'configlib', 0777, true) && !is_dir($concurrentDirectory))
                     {
                         throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
                     }
 
-                    if(!file_exists(Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp'))
+                    if(!file_exists($temporary_directory . DIRECTORY_SEPARATOR . 'configlib'))
                     {
                         print('Unable to create the temporary path to use' . PHP_EOL);
                         exit(1);
                     }
                 }
 
-                $tempPath = Runtime::getDataPath('net.nosial.configlib') . DIRECTORY_SEPARATOR . 'tmp';
+                $tempPath = $temporary_directory . DIRECTORY_SEPARATOR . 'configlib';
             }
 
             $fs = new Filesystem();
@@ -275,5 +270,31 @@
             }
 
             exit(0);
+        }
+
+        /**
+         * Retrieves the current version of the library. If the version is not set, it checks
+         * if the CONFIGLIB_VERSION constant is defined. If neither is available, it returns 'Unknown'
+         * and triggers a user warning.
+         *
+         * @return string The current version of the library.
+         * @noinspection PhpUndefinedConstantInspection
+         */
+        public static function getVersion(): string
+        {
+            if(self::$version !== null)
+            {
+                return self::$version;
+            }
+
+            if(defined('CONFIGLIB_VERSION'))
+            {
+                self::$version = CONFIGLIB_VERSION;
+                return self::$version;
+            }
+
+            self::$version = 'Unknown';
+            trigger_error('ConfigLib version is unknown', E_USER_WARNING);
+            return self::$version;
         }
     }
