@@ -43,7 +43,7 @@
         "default_configuration": "release",
         "main": "main",
         "define_constants": {
-            "version": "%ASSEMBLY.VERSION%"
+            "VERSION": "%ASSEMBLY.VERSION%"
         },
         "dependencies": [
             {
@@ -78,7 +78,7 @@
             }
         ],
         "configurations": [
-	    {
+            {
                 "name": "release",
                 "build_type": "ncc",
                 "output": "build/release/%ASSEMBLY.PACKAGE%.ncc"
