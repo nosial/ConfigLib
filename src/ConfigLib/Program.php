@@ -51,6 +51,7 @@
                 if(!file_exists($configuration->getPath()))
                 {
                     print(sprintf('Configuration \'%s\' does not exist, aborting' . PHP_EOL, $configuration->getName()));
+
                     exit(1);
                 }
 

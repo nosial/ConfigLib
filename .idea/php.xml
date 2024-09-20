@@ -11,10 +11,14 @@
   </component>
   <component name="PhpIncludePathManager">
     <include_path>
+      <path value="/var/ncc/packages/com.symfony.polyfill_mbstring=v1.31.0" />
+      <path value="/var/ncc/packages/com.symfony.filesystem=v7.1.2" />
+      <path value="/var/ncc/packages/com.symfony.yaml=v7.1.4" />
+      <path value="/var/ncc/packages/com.symfony.polyfill_ctype=v1.31.0" />
+      <path value="/var/ncc/packages/com.symfony.process=v7.1.3" />
+      <path value="/var/ncc/packages/net.nosial.optslib=1.1.0" />
       <path value="/usr/share/ncc" />
       <path value="/var/ncc/packages/net.nosial.loglib=1.1.0" />
-      <path value="/var/ncc/packages/com.symfony.yaml=2.0.7" />
-      <path value="/var/ncc/packages/com.symfony.process=2.0.7" />
       <path value="/usr/share/php" />
     </include_path>
   </component>
