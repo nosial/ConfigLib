@@ -1,8 +1,20 @@
+# Variables
+CONFIG ?= release
+LOG_LEVEL = debug
+OUTDIR = build/$(CONFIG)
+PACKAGE = $(OUTDIR)/net.nosial.configlib.ncc
+
+# Default Target
+all: build
+
+# Build Steps
 build:
-	ncc build --config="release" --log-level debug
+	ncc build --config=$(CONFIG) --log-level $(LOG_LEVEL)
 
 install:
-	sudo ncc package install --package="build/release/net.nosial.configlib.ncc" --skip-dependencies --reinstall -y --log-level debug
+	ncc package install --package=$(PACKAGE) --skip-dependencies --reinstall -y --log-level $(LOG_LEVEL)
 
 clean:
 	rm -rf build
+
+.PHONY: all build install clean
