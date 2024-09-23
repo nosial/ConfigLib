@@ -5,9 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2024-10-13
+## [1.1.0] - 2024-09-23
 
-This update introduces a new build system
+This update introduces changes for PHP 8.3 & NCC 2.1.0+ compatibility
+
+### Added
+ - Added PhpUnit tests for the library
+ - Added new option `--path` to the CLI interface to display the path to the configuration file
+
+### Changed
+ - Updated the codebase to be compatible with PHP 8.3
+ - Updated the codebase to be compatible with NCC 2.1.0+
+ - Updated Makefile
+
+### Fixed
+ - Fixed regex patterns to be more robust
+
 
 
 ## [1.0.4] - 2023-08-12
