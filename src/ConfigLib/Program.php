@@ -38,6 +38,7 @@
                 $editor = $args['editor'] ?? @$args['e'] ?? null;
                 $export = $args['export'] ?? null;
                 $import = $args['import'] ?? null;
+                $path = $args['path'] ?? null;
 
                 if($configuration_name === null)
                 {
@@ -53,6 +54,12 @@
                     print(sprintf('Configuration \'%s\' does not exist, aborting' . PHP_EOL, $configuration->getName()));
 
                     exit(1);
+                }
+
+                if($path !== null)
+                {
+                    print($configuration->getPath() . PHP_EOL);
+                    exit(0);
                 }
 
                 if($import !== null)
@@ -154,6 +161,7 @@
             print('  -e, --editor <editor>             (Optional) The editor to use (eg; nano, vim, notepad) (External)' . PHP_EOL);
             print('  --export <file>                   (Optional) Exports the configuration to a file' . PHP_EOL);
             print('  --import <file>                   (Optional) Imports the configuration from a file' . PHP_EOL);
+            print('  --path                            (Optional) Displays the configuration storage path' . PHP_EOL);
             print('  --nc                              (Optional) Disables type casting (eg; \'true\' > True) will always be a string' . PHP_EOL);
 
             print('Examples:' . PHP_EOL . PHP_EOL);
@@ -163,6 +171,7 @@
             print(' configlib --conf test --editor nano             Edit the configuration' . PHP_EOL);
             print(' configlib --conf test --export out.json         Export the configuration' . PHP_EOL);
             print(' configlib --conf test --import in.json          Import a configuration' . PHP_EOL);
+            print(' configlib --conf test --path                    Displays the configuration storage path' . PHP_EOL);
 
             exit(0);
         }
