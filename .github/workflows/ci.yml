@@ -46,12 +46,12 @@ jobs:
             echo "NCC build directory not found"
             exit 1
           fi
-          php "$NCC_DIR/INSTALL" --auto --install-composer
+          php "$NCC_DIR/INSTALL" --auto
           cd .. && rm -rf ncc
 
       - name: Build project
         run: |
-          ncc build --config release --build-source --log-level debug
+          ncc build --config release --log-level debug
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -106,12 +106,12 @@ jobs:
             echo "NCC build directory not found"
             exit 1
           fi
-          php "$NCC_DIR/INSTALL" --auto --install-composer
+          php "$NCC_DIR/INSTALL" --auto
           cd .. && rm -rf ncc
 
       - name: Install NCC packages
         run: |
-          ncc package install --package="ncc-build/net.nosial.configlib.ncc" --reinstall -y --log-level debug
+          ncc package install --package="ncc-build/net.nosial.configlib.ncc" --build-source --reinstall -y --log-level debug
 
       - name: Run PHPUnit tests
         run: |
