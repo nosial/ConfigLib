@@ -5,9 +5,6 @@
             "minimum_version": "8.0",
             "maximum_version": "8.2"
         },
-        "options": {
-            "create_symlink": true
-        },
         "update_source": {
             "source": "nosial/libs.config@n64",
             "repository": {
@@ -16,14 +13,28 @@
                 "host": "git.n64.cc",
                 "ssl": true
             }
+        },
+        "options": {
+            "create_symlink": true
         }
     },
+    "execution_policies":[
+        {
+            "name": "main",
+            "runner": "php",
+            "execute": {
+                "target": "main",
+                "working_directory": "%CWD%",
+                "tty": true
+            }
+        }
+    ],
     "assembly": {
         "name": "ConfigLib",
         "package": "net.nosial.configlib",
-        "description": "ConfigLib is a library for reading and writing configuration files via the NCC Runtime API",
         "company": "Nosial",
         "copyright": "Copyright (c) 2022-2023 Nosial",
+        "description": "ConfigLib is a library for reading and writing configuration files via the NCC Runtime API",
         "version": "1.1.1",
         "uuid": "9347259e-8e4d-11ed-85a7-fd07cf28ef35"
     },
@@ -38,26 +49,31 @@
             {
                 "name": "net.nosial.optslib",
                 "version": "latest",
+                "source_type": "remote",
                 "source": "nosial/libs.opts=latest@n64"
             },
             {
                 "name": "net.nosial.loglib",
                 "version": "latest",
+                "source_type": "remote",
                 "source": "nosial/libs.log=latest@n64"
             },
             {
                 "name": "com.symfony.filesystem",
                 "version": "latest",
+                "source_type": "remote",
                 "source": "symfony/filesystem=latest@packagist"
             },
             {
                 "name": "com.symfony.yaml",
                 "version": "latest",
+                "source_type": "remote",
                 "source": "symfony/yaml=latest@packagist"
             },
             {
                 "name": "com.symfony.process",
                 "version": "latest",
+                "source_type": "remote",
                 "source": "symfony/process=latest@packagist"
             }
         ],
@@ -74,72 +90,7 @@
                 "define_constants": {
                     "DEBUG": "1"
                 }
-            },
-            {
-                "name": "release-compressed",
-                "build_type": "ncc",
-                "output": "build/release/%ASSEMBLY.PACKAGE%.gz.ncc",
-                "options": {
-                    "compression": "high"
-                }
-            },
-            {
-                "name": "debug-compressed",
-                "build_type": "ncc",
-                "output": "build/debug/%ASSEMBLY.PACKAGE%.gz.ncc",
-                "options": {
-                    "compression": "high"
-                },
-                "define_constants": {
-                    "DEBUG": "1"
-                }
-            },
-            {
-                "name": "release-executable",
-                "build_type": "executable",
-                "output": "build/release/release_executable_gz",
-                "options": {
-                    "ncc_configuration": "release"
-                }
-            },
-            {
-                "name": "debug-executable",
-                "build_type": "executable",
-                "output": "build/debug/debug_executable_gz",
-                "options": {
-                    "ncc_configuration": "debug"
-                }
-            },
-            {
-                "name": "release-compressed-executable",
-                "build_type": "executable",
-                "output": "build/release/release_compressed_executable",
-                "options": {
-                    "ncc_configuration": "release-compressed"
-                }
-            },
-            {
-                "name": "debug-compressed-executable",
-                "build_type": "executable",
-                "output": "build/debug/debug_compressed_executable",
-                "options": {
-                    "ncc_configuration": "debug-compressed"
-                }
             }
         ]
-    },
-    "execution_policies": [
-        {
-            "name": "main",
-            "runner": "php",
-            "execute": {
-                "working_directory": "%CWD%",
-                "silent": false,
-                "tty": true,
-                "timeout": null,
-                "idle_timeout": null,
-                "target": "main"
-            }
-        }
-    ]
+    }
 }
