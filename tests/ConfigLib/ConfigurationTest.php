@@ -52,8 +52,10 @@ class ConfigurationTest extends TestCase
     public function testGetMethodWithValidKey(): void
     {
         $config = new Configuration('test');
-        $config->set('key1.key2', 'value');
+        $this->assertTrue($config->set('key1.key2', 'value', true));
         $this->assertEquals('value', $config->get('key1.key2'));
+        $this->assertTrue($config->set('foo.fizz_buzz', 'value', true));
+        $this->assertEquals('value', $config->get('foo.fizz_buzz'));
     }
 
     /**
