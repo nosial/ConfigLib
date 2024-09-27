@@ -64,9 +64,15 @@
                 }
             }
 
+            $filePath = $name . '.conf';
+            $globalDir = self::getGlobalDirectory();
+            if(is_dir($globalDir) && is_writable($globalDir))
+            {
+                $this->path = $globalDir . DIRECTORY_SEPARATOR . $name . '.conf';
+            }
+
             if ($this->path === null)
             {
-                $filePath = $name . '.conf';
                 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
                 {
                     $configDir = getenv('APPDATA') ?: getenv('LOCALAPPDATA');
@@ -513,5 +519,55 @@
             $fs = new Filesystem();
             $fs->dumpFile($path, $this->toYaml());
             $fs->chmod($path, 0777);
+        }
+
+        /**
+         * Retrieves the global directory path for configuration files.
+         *
+         * @return string The global directory path for configuration files.
+         */
+        public static function getGlobalDirectory(): string
+        {
+            $path = DIRECTORY_SEPARATOR . 'etc' . DIRECTORY_SEPARATOR . 'configlib';
+
+            if(file_exists($path) && is_writable($path))
+            {
+                return $path;
+            }
+
+            if((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'))
+            {
+                $variables = [
+                    'SYSTEMDRIVE',
+                    'CSIDL_APPDATA',
+                    'CSIDL_PROGRAM_FILES'
+                ];
+
+                foreach($variables as $variable)
+                {
+                    $environment_variable = getenv($variable);
+                    if($environment_variable)
+                    {
+                        return $environment_variable . DIRECTORY_SEPARATOR . 'configlib';
+                    }
+                }
+            }
+            else
+            {
+                $variables = [
+                    'HOME',
+                    'XDG_CONFIG_HOME',
+                    'XDG_DATA_HOME'
+                ];
+
+                foreach($variables as $variable)
+                {
+                    $environment_variable = getenv($variable);
+                    if($environment_variable)
+                    {
+                        return $environment_variable . DIRECTORY_SEPARATOR . 'configlib';
+                    }
+                }
+            }
         }
     }

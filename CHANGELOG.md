@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2024-09-27
+
+This update fixes a critical bug where configuration files may not be found when using different user accounts,
+especially when the configuration file is located in a directory that is not accessible by the user account running the
+application. This was fixed by changing the way the configuration file path is resolved including by adding a setup
+execution unit that will be executed post-installation to ensure that the configuration file is accessible by the user
+account running the application.
+
+
 ## [1.1.1] - 2024-09-26
 
 This update introduces a minor bug fix
