@@ -547,7 +547,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
             files: |
-                docs/*
+                documentation/*
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
