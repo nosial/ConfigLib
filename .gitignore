@@ -1,3 +1,4 @@
 build/
 /.idea/php-test-framework.xml
 /.idea/gbrowser_project.xml
+/.phpunit.result.cache
