@@ -105,7 +105,7 @@
             {
                 "name": "debug-executable",
                 "build_type": "executable",
-                "output": "build/release/debug_executable_gz",
+                "output": "build/debug/debug_executable_gz",
                 "options": {
                     "ncc_configuration": "debug"
                 }
@@ -121,7 +121,7 @@
             {
                 "name": "debug-compressed-executable",
                 "build_type": "executable",
-                "output": "build/release/debug_compressed_executable",
+                "output": "build/debug/debug_compressed_executable",
                 "options": {
                     "ncc_configuration": "debug-compressed"
                 }
