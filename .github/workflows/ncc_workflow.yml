@@ -553,6 +553,8 @@ jobs:
 
       - name: zip documentation
         run: |
+          sudo apt-get update
+          sudo apt-get install zip
           zip -r documentation.zip documentation
 
       - name: Upload documentation artifact
