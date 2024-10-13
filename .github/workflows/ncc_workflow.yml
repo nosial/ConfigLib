@@ -526,6 +526,32 @@ jobs:
           wget https://phar.phpunit.de/phpunit-11.3.phar
           php phpunit-11.3.phar --configuration phpunit.xml
 
+  upload-docs:
+    needs: [generate-phpdoc]
+    permissions: write-all
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.3
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download documentation artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            docs/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
   upload-artifacts:
     needs: [release, debug, release-compressed, debug-compressed, release-executable, debug-executable, release-compressed-executable, debug-compressed-executable, test]
     permissions: write-all
