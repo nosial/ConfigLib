@@ -526,31 +526,6 @@ jobs:
           wget https://phar.phpunit.de/phpunit-11.3.phar
           php phpunit-11.3.phar --configuration phpunit.xml
 
-  upload-docs:
-    needs: [generate-phpdoc]
-    permissions: write-all
-    runs-on: ubuntu-latest
-    container:
-      image: php:8.3
-    if: github.event_name == 'release'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download documentation artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: documentation
-
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            docs/
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   upload-artifacts:
     needs: [release, debug, release-compressed, debug-compressed, release-executable, debug-executable, release-compressed-executable, debug-compressed-executable, test]
     permissions: write-all
@@ -568,55 +543,94 @@ jobs:
         with:
           name: release
           path: release
+      - name: Upload release artifact to release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: |
+                release/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download debug artifact
         uses: actions/download-artifact@v4
         with:
           name: debug
           path: debug
+      - name: Upload debug artifact to release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: |
+                debug/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download release-compressed artifact
         uses: actions/download-artifact@v4
         with:
           name: release-compressed
           path: release-compressed
+      - name: Upload release-compressed artifact to release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: |
+                release-compressed/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download debug-compressed artifact
         uses: actions/download-artifact@v4
         with:
           name: debug-compressed
           path: debug-compressed
+      - name: Upload debug-compressed artifact to release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: |
+                debug-compressed/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download release-executable artifact
         uses: actions/download-artifact@v4
         with:
           name: release-executable
           path: release-executable
+      - name: Upload release-executable artifact to release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: |
+                release-executable/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download debug-executable artifact
         uses: actions/download-artifact@v4
         with:
           name: debug-executable
           path: debug-executable
+      - name: Upload debug-executable artifact to release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: |
+                debug-executable/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download release-compressed-executable artifact
         uses: actions/download-artifact@v4
         with:
           name: release-compressed-executable
           path: release-compressed-executable
+      - name: Upload release-compressed-executable artifact to release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: |
+                release-compressed-executable/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download debug-compressed-executable artifact
         uses: actions/download-artifact@v4
         with:
           name: debug-compressed-executable
           path: debug-compressed-executable
-
-
-      - name: Upload to GitHub Release
+      - name: Upload debug-compressed-executable artifact to release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            release/net.nosial.configlib.ncc
-            debug/net.nosial.configlib.ncc
-            release-compressed/net.nosial.configlib.gz.ncc
-            debug-compressed/net.nosial.configlib.gz.ncc
-            release-executable/release_executable_gz
-            debug-executable/debug_executable_gz
-            release-compressed-executable/release_compressed_executable
-            debug-compressed-executable/debug_compressed_executable
-
+            files: |
+                debug-compressed-executable/*
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
