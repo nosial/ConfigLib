@@ -460,11 +460,15 @@ jobs:
         run: |
           php phpDocumentor.phar -d src -t docs
 
+      - name: Archive PHPDoc
+        run: |
+          zip -r docs.zip docs
+
       - name: Upload PHPDoc
         uses: actions/upload-artifact@v4
         with:
           name: documentation
-          path: docs
+          path: docs.zip
 
   test:
     needs: [release, debug, release-compressed, debug-compressed, release-executable, debug-executable, release-compressed-executable, debug-compressed-executable, check-phpunit]
@@ -551,17 +555,11 @@ jobs:
           name: documentation
           path: documentation
 
-      - name: zip documentation
-        run: |
-          sudo apt-get update
-          sudo apt-get install zip
-          zip -r documentation.zip documentation
-
       - name: Upload documentation artifact
         uses: softprops/action-gh-release@v1
         with:
             files: |
-                documentation.zip
+                documentation/*
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
