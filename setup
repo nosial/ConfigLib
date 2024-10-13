@@ -1,0 +1,14 @@
+<?php
+
+    $global_directory = $path = DIRECTORY_SEPARATOR . 'etc' . DIRECTORY_SEPARATOR . 'configlib';
+
+    //try creating the directory if it doesn't exist
+    if(!file_exists($global_directory))
+    {
+        if(!mkdir($global_directory, 0777, true))
+        {
+            exit('Failed to create global directory');
+        }
+
+        chmod($global_directory, 0777);
+    }
