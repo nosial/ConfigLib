@@ -524,9 +524,16 @@ jobs:
       - name: Run PHPUnit tests
         run: |
           wget https://phar.phpunit.de/phpunit-11.3.phar
-          php phpunit-11.3.phar --configuration phpunit.xml
+          php phpunit-11.3.phar --configuration phpunit.xml --log-junit reports/junit.xml --log-teamcity reports/teamcity --testdox-html reports/testdox.html --testdox-text reports/testdox.txt --log-events-text reports/events.txt --log-events-verbose-text reports/verbose_events.txt
 
-  upload-documentation:
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: reports
+
+
+  release-documentation:
     needs: generate-phpdoc
     permissions: write-all
     runs-on: ubuntu-latest
@@ -551,8 +558,8 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  upload-artifacts:
-    needs: [release, debug, release-compressed, debug-compressed, release-executable, debug-executable, release-compressed-executable, debug-compressed-executable, test]
+  release-artifacts:
+    needs: [release, debug, release-compressed, debug-compressed, release-executable, debug-executable, release-compressed-executable, debug-compressed-executable]
     permissions: write-all
     runs-on: ubuntu-latest
     container:
