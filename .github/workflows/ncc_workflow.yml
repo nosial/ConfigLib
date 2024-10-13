@@ -549,6 +549,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: documentation
+          path: documentation
 
       - name: Upload documentation artifact to release
         uses: softprops/action-gh-release@v1
