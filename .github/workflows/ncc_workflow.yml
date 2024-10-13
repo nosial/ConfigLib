@@ -551,13 +551,18 @@ jobs:
           name: documentation
           path: documentation
 
-      - name: Upload documentation artifact to release
+      - name: zip documentation
+        run: |
+          zip -r documentation.zip documentation
+
+      - name: Upload documentation artifact
         uses: softprops/action-gh-release@v1
         with:
             files: |
-                documentation/*
+                documentation.zip
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   release-artifacts:
     needs: [release, debug, release-compressed, debug-compressed, release-executable, debug-executable, release-compressed-executable, debug-compressed-executable]
