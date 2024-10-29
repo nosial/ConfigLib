@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - Ongoing
+
+This update introduces a minor bug fix
+
+### Fixed
+ - Fixed regex pattern for configuration properties being considered invalid when they contain an underscore.
+
+
 ## [1.1.3] - 2024-10-13
 
 This update introduces a new build system

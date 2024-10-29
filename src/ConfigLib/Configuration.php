@@ -167,11 +167,10 @@
          */
         private static function validateKey(string $input): bool
         {
-            if (preg_match('/^([a-zA-Z0-9_]+\.?)+$/', $input))
+            if (preg_match('/^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*$/', $input))
             {
                 return true;
             }
-
             return false;
         }
 
