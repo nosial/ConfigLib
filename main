@@ -1,6 +1,24 @@
 <?php
 
-    require('ncc');
-    import('net.nosial.configlib', 'latest');
+    if (PHP_SAPI !== 'cli')
+    {
+        print('net.nosial.configlib must be run from the command line.' . PHP_EOL);
+        exit(1);
+    }
 
-    \ConfigLib\Program::main();
+    if(!isset($argv))
+    {
+        if(isset($_SERVER['argv']))
+        {
+            $argv = $_SERVER['argv'];
+        }
+        else
+        {
+            print('net.nosial.configlib failed to run, no $argv found.' . PHP_EOL);
+            exit(1);
+        }
+    }
+
+    require('ncc');
+    \ncc\Classes\Runtime::import('net.nosial.configlib', 'latest');
+	exit(\ConfigLib\Program::main($argv));

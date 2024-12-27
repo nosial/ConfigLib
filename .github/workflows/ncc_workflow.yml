@@ -51,7 +51,7 @@ jobs:
 
       - name: Build project
         run: |
-          ncc build --config release --log-level debug
+          ncc build --config release --build-source --log-level debug
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -100,111 +100,13 @@ jobs:
 
       - name: Build project
         run: |
-          ncc build --config debug --log-level debug
+          ncc build --config debug --build-source --log-level debug
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: debug
           path: build/debug/net.nosial.configlib.ncc
-  release-compressed:
-    runs-on: ubuntu-latest
-    container:
-      image: php:8.3
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          apt update -yqq
-          apt install git libpq-dev libzip-dev zip make wget gnupg -yqq
-
-      - name: Install phive
-        run: |
-          wget -O phive.phar https://phar.io/releases/phive.phar
-          wget -O phive.phar.asc https://phar.io/releases/phive.phar.asc
-          gpg --keyserver hkps://keys.openpgp.org --recv-keys 0x9D8A98B29B2D5D79
-          gpg --verify phive.phar.asc phive.phar
-          chmod +x phive.phar
-          mv phive.phar /usr/local/bin/phive
-
-      - name: Install phab
-        run: |
-          phive install phpab --global --trust-gpg-keys 0x2A8299CE842DD38C
-
-      - name: Install latest version of NCC
-        run: |
-          git clone https://git.n64.cc/nosial/ncc.git
-          cd ncc
-          make redist
-          NCC_DIR=$(find build/ -type d -name "ncc_*" | head -n 1)
-          if [ -z "$NCC_DIR" ]; then
-            echo "NCC build directory not found"
-            exit 1
-          fi
-          php "$NCC_DIR/INSTALL" --auto
-          cd .. && rm -rf ncc
-
-      - name: Build project
-        run: |
-          ncc build --config release-compressed --log-level debug
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-compressed
-          path: build/release/net.nosial.configlib.gz.ncc
-  debug-compressed:
-    runs-on: ubuntu-latest
-    container:
-      image: php:8.3
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          apt update -yqq
-          apt install git libpq-dev libzip-dev zip make wget gnupg -yqq
-
-      - name: Install phive
-        run: |
-          wget -O phive.phar https://phar.io/releases/phive.phar
-          wget -O phive.phar.asc https://phar.io/releases/phive.phar.asc
-          gpg --keyserver hkps://keys.openpgp.org --recv-keys 0x9D8A98B29B2D5D79
-          gpg --verify phive.phar.asc phive.phar
-          chmod +x phive.phar
-          mv phive.phar /usr/local/bin/phive
-
-      - name: Install phab
-        run: |
-          phive install phpab --global --trust-gpg-keys 0x2A8299CE842DD38C
-
-      - name: Install latest version of NCC
-        run: |
-          git clone https://git.n64.cc/nosial/ncc.git
-          cd ncc
-          make redist
-          NCC_DIR=$(find build/ -type d -name "ncc_*" | head -n 1)
-          if [ -z "$NCC_DIR" ]; then
-            echo "NCC build directory not found"
-            exit 1
-          fi
-          php "$NCC_DIR/INSTALL" --auto
-          cd .. && rm -rf ncc
-
-      - name: Build project
-        run: |
-          ncc build --config debug-compressed --log-level debug
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-compressed
-          path: build/debug/net.nosial.configlib.gz.ncc
   release-executable:
     runs-on: ubuntu-latest
     container:
@@ -247,7 +149,7 @@ jobs:
 
       - name: Build project
         run: |
-          ncc build --config release-executable --log-level debug
+          ncc build --config release-executable --build-source --log-level debug
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -296,14 +198,14 @@ jobs:
 
       - name: Build project
         run: |
-          ncc build --config debug-executable --log-level debug
+          ncc build --config debug-executable --build-source --log-level debug
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: debug-executable
           path: build/debug/debug_executable_gz
-  release-compressed-executable:
+  release_executable:
     runs-on: ubuntu-latest
     container:
       image: php:8.3
@@ -345,14 +247,14 @@ jobs:
 
       - name: Build project
         run: |
-          ncc build --config release-compressed-executable --log-level debug
+          ncc build --config release_executable --build-source --log-level debug
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-compressed-executable
-          path: build/release/release_compressed_executable
-  debug-compressed-executable:
+          name: release_executable
+          path: build/release/ConfigLib
+  debug_executable:
     runs-on: ubuntu-latest
     container:
       image: php:8.3
@@ -394,13 +296,13 @@ jobs:
 
       - name: Build project
         run: |
-          ncc build --config debug-compressed-executable --log-level debug
+          ncc build --config debug_executable --build-source --log-level debug
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: debug-compressed-executable
-          path: build/debug/debug_compressed_executable
+          name: debug_executable
+          path: build/debug/ConfigLib
 
 
   # Checking for phpunit.xml
@@ -471,7 +373,7 @@ jobs:
           path: docs.zip
 
   test:
-    needs: [release, debug, release-compressed, debug-compressed, release-executable, debug-executable, release-compressed-executable, debug-compressed-executable, check-phpunit]
+    needs: [release, debug, release-executable, debug-executable, release_executable, debug_executable, check-phpunit]
     runs-on: ubuntu-latest
     container:
       image: php:8.3
@@ -565,7 +467,7 @@ jobs:
 
 
   release-artifacts:
-    needs: [release, debug, release-compressed, debug-compressed, release-executable, debug-executable, release-compressed-executable, debug-compressed-executable]
+    needs: [release, debug, release-executable, debug-executable, release_executable, debug_executable]
     permissions: write-all
     runs-on: ubuntu-latest
     container:
@@ -600,30 +502,6 @@ jobs:
                 debug/*
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download release-compressed artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: release-compressed
-          path: release-compressed
-      - name: Upload release-compressed artifact to release
-        uses: softprops/action-gh-release@v1
-        with:
-            files: |
-                release-compressed/*
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download debug-compressed artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: debug-compressed
-          path: debug-compressed
-      - name: Upload debug-compressed artifact to release
-        uses: softprops/action-gh-release@v1
-        with:
-            files: |
-                debug-compressed/*
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Download release-executable artifact
         uses: actions/download-artifact@v4
         with:
@@ -648,27 +526,27 @@ jobs:
                 debug-executable/*
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download release-compressed-executable artifact
+      - name: Download release_executable artifact
         uses: actions/download-artifact@v4
         with:
-          name: release-compressed-executable
-          path: release-compressed-executable
-      - name: Upload release-compressed-executable artifact to release
+          name: release_executable
+          path: release_executable
+      - name: Upload release_executable artifact to release
         uses: softprops/action-gh-release@v1
         with:
             files: |
-                release-compressed-executable/*
+                release_executable/*
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download debug-compressed-executable artifact
+      - name: Download debug_executable artifact
         uses: actions/download-artifact@v4
         with:
-          name: debug-compressed-executable
-          path: debug-compressed-executable
-      - name: Upload debug-compressed-executable artifact to release
+          name: debug_executable
+          path: debug_executable
+      - name: Upload debug_executable artifact to release
         uses: softprops/action-gh-release@v1
         with:
             files: |
-                debug-compressed-executable/*
+                debug_executable/*
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
