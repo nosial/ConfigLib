@@ -66,6 +66,8 @@
 
             if ($this->path === null)
             {
+                $filePath = $name . '.conf';
+
                 // If the CONFIGLIB_PATH environment variable is set, use it as the configuration path
                 if(getenv('CONFIGLIB_PATH'))
                 {
@@ -73,7 +75,6 @@
                 }
                 else
                 {
-                    $filePath = $name . '.conf';
                     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
                     {
                         $configDir = getenv('APPDATA') ?: getenv('LOCALAPPDATA');
