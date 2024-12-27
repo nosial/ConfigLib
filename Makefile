@@ -11,7 +11,7 @@ all: build
 build:
 	ncc build --config=$(CONFIG) --log-level $(LOG_LEVEL)
 
-install:
+install: build
 	ncc package install --package=$(PACKAGE) --skip-dependencies --build-source --reinstall -y --log-level $(LOG_LEVEL)
 
 clean:
