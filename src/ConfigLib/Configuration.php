@@ -66,54 +66,62 @@
 
             if ($this->path === null)
             {
-                $filePath = $name . '.conf';
-                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
+                // If the CONFIGLIB_PATH environment variable is set, use it as the configuration path
+                if(getenv('CONFIGLIB_PATH'))
                 {
-                    $configDir = getenv('APPDATA') ?: getenv('LOCALAPPDATA');
-
-                    if (!$configDir)
-                    {
-                        // Fallback to system temporary directory
-                        $configDir = sys_get_temp_dir();
-                    }
-
-                    $configDir .= DIRECTORY_SEPARATOR . 'ConfigLib';
+                    $configDir = getenv('CONFIGLIB_PATH');
                 }
                 else
                 {
-                    $homeDir = getenv('HOME') ?: '';
-                    $configDirs = [];
-
-                    if ($homeDir)
+                    $filePath = $name . '.conf';
+                    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
                     {
-                        $configDirs[] = $homeDir . DIRECTORY_SEPARATOR . '.configlib';
-                        $configDirs[] = $homeDir . DIRECTORY_SEPARATOR . '.config' . DIRECTORY_SEPARATOR . 'configlib';
-                    }
+                        $configDir = getenv('APPDATA') ?: getenv('LOCALAPPDATA');
 
-                    $configDirs[] = '/etc/configlib';
-                    $configDirs[] = '/var/lib/configlib';
-
-                    $configDir = null;
-
-                    // Iterate over the list of directories and select the first one that can be created or written to
-                    foreach ($configDirs as $dir)
-                    {
-                        if (file_exists($dir) && is_writable($dir))
+                        if (!$configDir)
                         {
-                            $configDir = $dir;
-                            break;
+                            // Fallback to system temporary directory
+                            $configDir = sys_get_temp_dir();
                         }
-                        elseif (!file_exists($dir) && mkdir($dir, 0755, true))
-                        {
-                            $configDir = $dir;
-                            break;
-                        }
-                    }
 
-                    if (!$configDir)
+                        $configDir .= DIRECTORY_SEPARATOR . 'ConfigLib';
+                    }
+                    else
                     {
-                        Log::warning('net.nosial.configlib', sprintf('Unable to find a proper directory to store configuration paths in, using temporary directory instead: %s', sys_get_temp_dir()));
-                        $configDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'configlib';
+                        $homeDir = getenv('HOME') ?: '';
+                        $configDirs = [];
+
+                        if ($homeDir)
+                        {
+                            $configDirs[] = $homeDir . DIRECTORY_SEPARATOR . '.configlib';
+                            $configDirs[] = $homeDir . DIRECTORY_SEPARATOR . '.config' . DIRECTORY_SEPARATOR . 'configlib';
+                        }
+
+                        $configDirs[] = '/etc/configlib';
+                        $configDirs[] = '/var/lib/configlib';
+
+                        $configDir = null;
+
+                        // Iterate over the list of directories and select the first one that can be created or written to
+                        foreach ($configDirs as $dir)
+                        {
+                            if (file_exists($dir) && is_writable($dir))
+                            {
+                                $configDir = $dir;
+                                break;
+                            }
+                            elseif (!file_exists($dir) && mkdir($dir, 0755, true))
+                            {
+                                $configDir = $dir;
+                                break;
+                            }
+                        }
+
+                        if (!$configDir)
+                        {
+                            Log::warning('net.nosial.configlib', sprintf('Unable to find a proper directory to store configuration paths in, using temporary directory instead: %s', sys_get_temp_dir()));
+                            $configDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'configlib';
+                        }
                     }
                 }
 
