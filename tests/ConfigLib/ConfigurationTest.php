@@ -9,7 +9,11 @@ class ConfigurationTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $config = new Configuration('test');
-        unlink($config->getPath());
+
+        if(file_exists($config->getPath()))
+        {
+            unlink($config->getPath());
+        }
     }
 
     public function testConstruct(): void
@@ -24,6 +28,7 @@ class ConfigurationTest extends TestCase
 
         $this->assertTrue($config->set('key1.key2', 'value', true));
         $this->assertEquals('value', $config->get('key1.key2'));
+
     }
 
     public function testSetNotExists(): void
