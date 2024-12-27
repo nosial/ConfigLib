@@ -5,12 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.2] - 2024-12-27
+## [1.1.5] - 2024-12-27
 
 This update introduces minor improvements
 
 ### Added
  - Add support for CONFIGLIB_PATH environment variable to specify the path to the configuration files directory
+
+
+## [1.1.4] - 2024-10-29
+
+This update introduces a minor bug fix
+
+### Fixed
+- Fixed regex pattern for configuration properties being considered invalid when they contain an underscore.
+
+
+
+## [1.1.3] - 2024-10-13
+
+This update introduces a new build system
+
+
+
+## [1.1.2] - 2024-09-27
+
+ > This change has been reverted
+
+This update fixes a critical bug where configuration files may not be found when using different user accounts,
+especially when the configuration file is located in a directory that is not accessible by the user account running the
+application. This was fixed by changing the way the configuration file path is resolved including by adding a setup
+execution unit that will be executed post-installation to ensure that the configuration file is accessible by the user
+account running the application.
 
 
 ## [1.1.1] - 2024-09-26
