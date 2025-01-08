@@ -1,7 +1,5 @@
 <?php
 
-    /** @noinspection PhpMissingFieldTypeInspection */
-
     namespace ConfigLib;
 
     use Exception;
@@ -14,44 +12,42 @@
     {
         /**
          * The name of the configuration
-         *
-         * @var string
+         * @var string|array
          */
-        private $name;
+        private string|array $name;
 
         /**
          * The path to the configuration file
-         *
-         * @var string
+         * @var string|null
          */
-        private $path;
+        private ?string $path;
 
         /**
          * The configuration data
-         *
          * @var array
          */
-        private $configuration;
+        private array $configuration;
 
         /**
          * Indicates if the current instance is modified
-         *
          * @var bool
          */
-        private $modified;
+        private bool $modified;
 
         /**
          * Public Constructor
          *
          * @param string $name The name of the configuration (e.g. "MyApp" or "net.example.myapp")
+         * @param string|null $path The directory where the configuration file will be stored
          */
-        public function __construct(string $name='default')
+        public function __construct(string $name='default', ?string $path=null)
         {
             // Sanitize $name for a file path
             $name = strtolower($name);
             $name = str_replace(array('/', '\\', '.'), '_', $name);
-
             $env = getenv(sprintf("CONFIGLIB_%s", strtoupper($name)));
+            $this->path = null;
+
             if($env !== false)
             {
                 if(file_exists($env))
@@ -62,6 +58,21 @@
                 {
                     Log::warning('net.nosial.configlib', sprintf('Environment variable "%s" points to a non-existent file, resorting to default/builtin configuration', $env));
                 }
+            }
+
+            if($path !== null)
+            {
+                if(!is_dir(dirname($path)))
+                {
+                    throw new RuntimeException(sprintf('Directory "%s" does not exist', dirname($path)));
+                }
+
+                if(!is_writable(dirname($path)))
+                {
+                    throw new RuntimeException(sprintf('Directory "%s" is not writable', dirname($path)));
+                }
+
+                $this->path = $path;
             }
 
             if ($this->path === null)

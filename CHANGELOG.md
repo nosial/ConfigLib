@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This update introduces minor improvements
 
+### Changed
+ - Changed properties to become typed properties
+
+### Added
+ - Added a new constructor parameter called `path` which is an optional parameter that allows you to specify the path to
+   the configuration files directory. If not specified the library will proceed with resolving
+   the path to the configuration files directory using the default method. This will override
+   the `CONFIGLIB_PATH` environment variable if it is set.
+
 
 ## [1.1.5] - 2024-12-27
 
