@@ -9,10 +9,25 @@ be configured more easily by following the documented instructions on how to alt
 could use a builtin editor to edit the configuration file manually.
 
 
+## Community
+
+This project and many others from Nosial are available on multiple publicly available and free git repositories at
+
+- [n64](https://git.n64.cc/nosial/configlib)
+- [GitHub](https://github.com/nosial/configlib)
+- [Codeberg](https://codeberg.org/nosial/configlib)
+
+Issues & Pull Requests are frequently checked and to be referenced accordingly in commits and changes, Nosial remains
+dedicated to keep these repositories up to date when possible.
+
+For questions & discussions see the public Telegram community at [@NosialDiscussions](https://t.me/NosialDiscussions).
+We do encourage community support and discussions, please be respectful and follow the rules of the community.
+
 ## Table of contents
 
 <!-- TOC -->
 * [ConfigLib](#configlib)
+  * [Community](#community)
   * [Table of contents](#table-of-contents)
   * [Installation](#installation)
   * [Compile from source](#compile-from-source)
