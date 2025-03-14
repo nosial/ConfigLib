@@ -24,7 +24,7 @@
         "description": "ConfigLib is a library for reading and writing configuration files via the NCC Runtime API",
         "company": "Nosial",
         "copyright": "Copyright (c) 2022-2023 Nosial",
-        "version": "1.1.6",
+        "version": "1.1.7",
         "uuid": "9347259e-8e4d-11ed-85a7-fd07cf28ef35"
     },
     "build": {
@@ -38,12 +38,12 @@
             {
                 "name": "net.nosial.optslib",
                 "version": "latest",
-                "source": "nosial/libs.opts=latest@n64"
+                "source": "nosial/optslib=latest@github"
             },
             {
-                "name": "net.nosial.loglib",
+                "name": "net.nosial.loglib2",
                 "version": "latest",
-                "source": "nosial/libs.log=latest@n64"
+                "source": "nosial/loglib2=latest@github"
             },
             {
                 "name": "com.symfony.filesystem",

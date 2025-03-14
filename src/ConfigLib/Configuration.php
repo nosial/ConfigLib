@@ -3,13 +3,19 @@
     namespace ConfigLib;
 
     use Exception;
-    use LogLib\Log;
+    use LogLib2\Logger;
     use RuntimeException;
     use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Yaml\Yaml;
 
     class Configuration
     {
+        /**
+         * The logger of the class
+         * @var Logger
+         */
+        private Logger $logger;
+
         /**
          * The name of the configuration
          * @var string|array
@@ -42,6 +48,8 @@
          */
         public function __construct(string $name='default', ?string $path=null)
         {
+            $this->logger = new Logger('net.nosial.configlib');
+
             // Sanitize $name for a file path
             $name = strtolower($name);
             $name = str_replace(array('/', '\\', '.'), '_', $name);
@@ -56,7 +64,7 @@
                 }
                 else
                 {
-                    Log::warning('net.nosial.configlib', sprintf('Environment variable "%s" points to a non-existent file, resorting to default/builtin configuration', $env));
+                    $this->logger->warning(sprintf('Environment variable "%s" points to a non-existent file, resorting to default/builtin configuration', $env));
                 }
             }
 
@@ -131,7 +139,7 @@
 
                         if (!$configDir)
                         {
-                            Log::warning('net.nosial.configlib', sprintf('Unable to find a proper directory to store configuration paths in, using temporary directory instead: %s', sys_get_temp_dir()));
+                            $this->logger->warning(sprintf('Unable to find a proper directory to store configuration paths in, using temporary directory instead: %s', sys_get_temp_dir()));
                             $configDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'configlib';
                         }
                     }
@@ -163,7 +171,7 @@
                 }
                 catch(Exception $e)
                 {
-                    Log::error('net.nosial.configlib', sprintf('Unable to load configuration "%s", %s', $this->name, $e->getMessage()));
+                    $this->logger->error(sprintf('Unable to load configuration "%s", %s', $this->name, $e->getMessage()), $e);
                     throw new RuntimeException(sprintf('Unable to load configuration "%s"', $this->name), $e);
                 }
             }
@@ -355,7 +363,7 @@
             }
 
             $this->modified = false;
-            Log::debug('net.nosial.configlib', sprintf('Configuration "%s" saved', $this->name));
+            $this->logger->debug(sprintf('Configuration "%s" saved', $this->name));
         }
 
         /**
@@ -437,7 +445,7 @@
             }
 
             $this->modified = false;
-            Log::debug('net.nosial.configlib', 'Loaded configuration file: ' . $this->path);
+            $this->logger->debug('Loaded configuration file: ' . $this->path);
         }
 
         /**
@@ -495,7 +503,7 @@
                 }
                 catch(Exception $e)
                 {
-                    Log::error('net.nosial.configlib', sprintf('Unable to save configuration "%s" to disk, %s', $this->name, $e->getMessage()));
+                    $this->logger->error(sprintf('Unable to save configuration "%s" to disk, %s', $this->name, $e->getMessage()), $e);
                 }
             }
         }
