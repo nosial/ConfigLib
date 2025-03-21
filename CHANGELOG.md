@@ -11,6 +11,7 @@ This update introduces minor changes
 
 ### Changed
  - Disabled tty mode for the main execution points to prevent issues with docker environments
+ - Refactor exception handling in Configuration class to include error codes
 
 
 ## [1.1.7] - 2025-03-14

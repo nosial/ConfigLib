@@ -172,7 +172,7 @@
                 catch(Exception $e)
                 {
                     $this->logger->error(sprintf('Unable to load configuration "%s", %s', $this->name, $e->getMessage()), $e);
-                    throw new RuntimeException(sprintf('Unable to load configuration "%s"', $this->name), $e);
+                    throw new RuntimeException(sprintf('Unable to load configuration "%s"', $this->name), $e->getCode(), $e);
                 }
             }
             else
@@ -359,7 +359,7 @@
             }
             catch (Exception $e)
             {
-                throw new RuntimeException('Unable to write configuration file', $e);
+                throw new RuntimeException('Unable to write configuration file', $e->getCode(), $e);
             }
 
             $this->modified = false;
@@ -408,7 +408,7 @@
             }
             catch (Exception $e)
             {
-                throw new RuntimeException('Unable to read configuration file', $e);
+                throw new RuntimeException('Unable to read configuration file', $e->getCode(), $e);
             }
 
             $prefix = 'CONFIGLIB_' . strtoupper($this->name) . '_';
