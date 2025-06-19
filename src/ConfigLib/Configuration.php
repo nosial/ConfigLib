@@ -432,4 +432,25 @@
             $fileFormat->toFile($this->configuration, $filePath, $appendExtension);
             @chmod($filePath, 0666);
         }
+
+        /**
+         * Returns a String representation of the serialized configuration file
+         *
+         * @param FileFormat $fileFormat Optional. The file format to export as a string
+         * @return string The serialized data
+         */
+        public function toString(FileFormat $fileFormat=FileFormat::YAML): string
+        {
+            return $fileFormat->serialize($this->configuration);
+        }
+
+        /**
+         * Returns a YAML representation of the configuration in it's current state
+         *
+         * @return string The YAML configuration string
+         */
+        public function __toString(): string
+        {
+            return FileFormat::YAML->serialize($this->configuration);
+        }
     }

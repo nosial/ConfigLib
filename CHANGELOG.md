@@ -14,6 +14,7 @@ This update introduces minor changes and improvements
  - Added two new parameters to \ConfigLib\Configuration->setDefault called `?string $environmentVariable=null, bool $override=true`
    which allows the program to override the default configuration value with an environment variable if one is set.
  - Refactor Configuration class for improved environment variable handling and path validation
+ - Add string representation methods for configuration serialization
 
 
 ## [1.1.8] - 2025-03-21
