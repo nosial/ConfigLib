@@ -10,34 +10,10 @@
 
     class Configuration
     {
-        /**
-         * The logger of the class
-         * @var Logger
-         */
         private Logger $logger;
-
-        /**
-         * The name of the configuration
-         * @var string|array
-         */
         private string|array $name;
-
-        /**
-         * The path to the configuration file
-         * @var string|null
-         */
         private ?string $path;
-
-        /**
-         * The configuration data
-         * @var array
-         */
         private array $configuration;
-
-        /**
-         * Indicates if the current instance is modified
-         * @var bool
-         */
         private bool $modified;
 
         /**
@@ -51,33 +27,27 @@
             $this->logger = new Logger('net.nosial.configlib');
 
             // Sanitize $name for a file path
-            $name = strtolower($name);
-            $name = str_replace(array('/', '\\', '.'), '_', $name);
-            $env = getenv(sprintf("CONFIGLIB_%s", strtoupper($name)));
+            $sanitizedName = strtolower($name);
+            $sanitizedName = str_replace(array('/', '\\', '.'), '_', $sanitizedName);
+            $env = getenv(sprintf("CONFIGLIB_%s", strtoupper($sanitizedName)));
             $this->path = null;
 
-            if($env !== false)
+            if($env !== false && file_exists($env))
             {
-                if(file_exists($env))
-                {
-                    $this->path = $env;
-                }
-                else
-                {
-                    $this->logger->warning(sprintf('Environment variable "%s" points to a non-existent file, resorting to default/builtin configuration', $env));
-                }
+                $this->path = $env;
+            }
+            elseif($env !== false)
+            {
+                $this->logger->warning(sprintf('Environment variable "%s" points to a non-existent file, resorting to default/builtin configuration', $env));
             }
 
             if($path !== null)
             {
-                if(!is_dir(dirname($path)))
-                {
-                    throw new RuntimeException(sprintf('Directory "%s" does not exist', dirname($path)));
-                }
+                $dir = dirname($path);
 
-                if(!is_writable(dirname($path)))
+                if(!is_dir($dir) || !is_writable($dir))
                 {
-                    throw new RuntimeException(sprintf('Directory "%s" is not writable', dirname($path)));
+                    throw new RuntimeException(sprintf('Directory "%s" does not exist or is not writable', $dir));
                 }
 
                 $this->path = $path;
@@ -85,25 +55,14 @@
 
             if ($this->path === null)
             {
-                $filePath = $name . '.conf';
+                $filePath = $sanitizedName . '.conf';
+                $configDir = getenv('CONFIGLIB_PATH');
 
-                // If the CONFIGLIB_PATH environment variable is set, use it as the configuration path
-                if(getenv('CONFIGLIB_PATH'))
-                {
-                    $configDir = getenv('CONFIGLIB_PATH');
-                }
-                else
+                if(!$configDir)
                 {
                     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
                     {
-                        $configDir = getenv('APPDATA') ?: getenv('LOCALAPPDATA');
-
-                        if (!$configDir)
-                        {
-                            // Fallback to system temporary directory
-                            $configDir = sys_get_temp_dir();
-                        }
-
+                        $configDir = getenv('APPDATA') ?: getenv('LOCALAPPDATA') ?: sys_get_temp_dir();
                         $configDir .= DIRECTORY_SEPARATOR . 'ConfigLib';
                     }
                     else
@@ -120,24 +79,16 @@
                         $configDirs[] = '/etc/configlib';
                         $configDirs[] = '/var/lib/configlib';
 
-                        $configDir = null;
-
-                        // Iterate over the list of directories and select the first one that can be created or written to
                         foreach ($configDirs as $dir)
                         {
-                            if (file_exists($dir) && is_writable($dir))
-                            {
-                                $configDir = $dir;
-                                break;
-                            }
-                            elseif (!file_exists($dir) && mkdir($dir, 0755, true))
+                            if ((file_exists($dir) && is_writable($dir)) || (!file_exists($dir) && @mkdir($dir, 0755, true)))
                             {
                                 $configDir = $dir;
                                 break;
                             }
                         }
 
-                        if (!$configDir)
+                        if (!isset($configDir))
                         {
                             $this->logger->warning(sprintf('Unable to find a proper directory to store configuration paths in, using temporary directory instead: %s', sys_get_temp_dir()));
                             $configDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'configlib';
@@ -145,22 +96,15 @@
                     }
                 }
 
-                // Ensure the directory exists
-                if (!file_exists($configDir))
+                if (!file_exists($configDir) && !@mkdir($configDir, 0755, true) && !is_dir($configDir))
                 {
-                    if (!mkdir($configDir, 0755, true) && !is_dir($configDir))
-                    {
-                        throw new RuntimeException(sprintf('Directory "%s" was not created', $configDir));
-                    }
+                    throw new RuntimeException(sprintf('Directory "%s" was not created', $configDir));
                 }
 
                 $this->path = $configDir . DIRECTORY_SEPARATOR . $filePath;
             }
 
-            // Set the name
-            $this->name = $name;
-
-            // Default Configuration
+            $this->name = $sanitizedName;
             $this->modified = false;
 
             if(file_exists($this->path))
@@ -189,12 +133,7 @@
          */
         private static function validateKey(string $input): bool
         {
-            if (preg_match('/^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*$/', $input))
-            {
-                return true;
-            }
-
-            return false;
+            return (bool)preg_match('/^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*$/', $input);
         }
 
         /**
@@ -227,8 +166,7 @@
                 }
             }
 
-            // Return the value at the end of the path, or the default if the value is null
-            return $current ?? $default;
+            return $current !== null ? $current : $default;
         }
 
         /**
@@ -241,7 +179,6 @@
          */
         public function set(string $key, mixed $value, bool $create = false): bool
         {
-            // Validate the provided key
             if (!self::validateKey($key))
             {
                 return false;
@@ -268,7 +205,6 @@
                         return false;
                     }
                 }
-
                 $current = &$current[$keyPart];
             }
 
@@ -285,7 +221,6 @@
          */
         public function exists(string $key): bool
         {
-            // Validate the provided key
             if (!self::validateKey($key))
             {
                 return false;
@@ -320,18 +255,11 @@
          */
         public function setDefault(string $key, mixed $value, ?string $environmentVariable=null, bool $override=true): bool
         {
-            if($environmentVariable !== null)
-            {
-                $environmentVariable = getenv($environmentVariable);
-            }
-            else
-            {
-                $environmentVariable = false;
-            }
+            $envValue = $environmentVariable !== null ? getenv($environmentVariable) : false;
 
-            if($override && $environmentVariable !== false || strlen($environmentVariable) > 0)
+            if(($override && $envValue !== false) || (is_string($envValue) && strlen($envValue) > 0))
             {
-                $this->set($key, $environmentVariable, true);
+                $this->set($key, $envValue, true);
                 return true;
             }
 
@@ -352,6 +280,7 @@
         public function clear(): void
         {
             $this->configuration = [];
+            $this->modified = true;
         }
 
         /**
@@ -369,9 +298,8 @@
             try
             {
                 $fs = new Filesystem();
-
                 $fs->dumpFile($this->path, FileFormat::JSON_PRETTY->serialize($this->configuration));
-                $fs->chmod($this->path, 0777);
+                $fs->chmod($this->path, 0666);
             }
             catch (Exception $e)
             {
@@ -394,13 +322,11 @@
             {
                 return;
             }
-
             $fs = new Filesystem();
             if (!$fs->exists($this->path))
             {
                 return;
             }
-
             try
             {
                 $this->configuration = FileFormat::fromFile($this->path);
@@ -409,7 +335,6 @@
             {
                 throw new RuntimeException('Unable to read configuration file', $e->getCode(), $e);
             }
-
             $this->modified = false;
             $this->logger->debug('Loaded configuration file: ' . $this->path);
         }
@@ -422,7 +347,7 @@
          */
         public function getName(): string
         {
-            return $this->name;
+            return is_array($this->name) ? implode('_', $this->name) : $this->name;
         }
 
         /**
@@ -483,12 +408,14 @@
         public function import(string $filePath): void
         {
             $fs = new Filesystem();
+
             if(!$fs->exists($filePath))
             {
                 throw new RuntimeException(sprintf('Unable to import configuration file "%s", file does not exist', $filePath));
             }
 
-            $this->configuration = array_replace_recursive($this->configuration, FileFormat::fromFile($filePath));
+            $imported = FileFormat::fromFile($filePath);
+            $this->configuration = array_replace_recursive($this->configuration, $imported);
             $this->modified = true;
         }
 
@@ -503,6 +430,6 @@
         public function export(string $filePath, FileFormat $fileFormat=FileFormat::YAML, bool $appendExtension=true): void
         {
             $fileFormat->toFile($this->configuration, $filePath, $appendExtension);
-            chmod($filePath, 0777);
+            @chmod($filePath, 0666);
         }
     }
