@@ -11,6 +11,8 @@ This update introduces minor changes and improvements
 
 ### Changed 
  - Refactor Configuration class to use FileFormat for serialization and deserialization
+ - Added two new parameters to \ConfigLib\Configuration->setDefault called `?string $environmentVariable=null, bool $override=true`
+   which allows the program to override the default configuration value with an environment variable if one is set.
 
 
 ## [1.1.8] - 2025-03-21
