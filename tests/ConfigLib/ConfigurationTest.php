@@ -107,6 +107,32 @@ class ConfigurationTest extends TestCase
 
     /**
      * @test
+     * Test setDefault uses environment variable when set and override is true
+     */
+    public function testSetDefaultWithEnvVarOverrideTrue(): void
+    {
+        $config = new Configuration('test_env_override_true');
+        putenv('CONFIGLIB_TEST_ENV=env_value');
+        $this->assertTrue($config->setDefault('env.key', 'default', 'CONFIGLIB_TEST_ENV'));
+        $this->assertEquals('env_value', $config->get('env.key'));
+        putenv('CONFIGLIB_TEST_ENV'); // cleanup
+    }
+
+    /**
+     * @test
+     * Test setDefault uses environment variable when set and override is false
+     */
+    public function testSetDefaultWithEnvVarOverrideFalse(): void
+    {
+        $config = new Configuration('test_env_override_false');
+        putenv('CONFIGLIB_TEST_ENV2=env_value2');
+        $this->assertTrue($config->setDefault('env.key2', 'default2', 'CONFIGLIB_TEST_ENV2', false));
+        $this->assertEquals('env_value2', $config->get('env.key2'));
+        putenv('CONFIGLIB_TEST_ENV2'); // cleanup
+    }
+
+    /**
+     * @test
      * Test export and import functionality for all supported file formats
      */
     public function testExportImportAllFormats(): void

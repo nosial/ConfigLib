@@ -314,10 +314,27 @@
          *
          * @param string $key The key to set (e.g. "key1.key2.key3")
          * @param mixed $value The value to set
+         * @param string|null $environmentVariable The environment variable to use as the default if it's set
+         * @param bool $override Optional. If True, the environment variable if found will always override the value
          * @return bool True if the value was set, false otherwise
          */
-        public function setDefault(string $key, mixed $value): bool
+        public function setDefault(string $key, mixed $value, ?string $environmentVariable=null, bool $override=true): bool
         {
+            if($environmentVariable !== null)
+            {
+                $environmentVariable = getenv($environmentVariable);
+            }
+            else
+            {
+                $environmentVariable = false;
+            }
+
+            if($override && $environmentVariable !== false || strlen($environmentVariable) > 0)
+            {
+                $this->set($key, $environmentVariable, true);
+                return true;
+            }
+
             if($this->exists($key))
             {
                 return false;
