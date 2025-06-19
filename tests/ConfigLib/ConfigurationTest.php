@@ -104,4 +104,75 @@ class ConfigurationTest extends TestCase
         $this->assertTrue($config->setDefault('non.existing.key', 'default'));
         $this->assertEquals('default', $config->get('non.existing.key'));
     }
+
+    /**
+     * @test
+     * Test export and import functionality for all supported file formats
+     */
+    public function testExportImportAllFormats(): void
+    {
+        $formats = [FileFormat::YAML, FileFormat::JSON, FileFormat::JSON_PRETTY, FileFormat::SERIALIZED];
+        $baseConfig = [
+            'section' => [
+                'foo' => 'bar',
+                'baz' => 123,
+                'arr' => [1, 2, 3]
+            ]
+        ];
+        $tmpFiles = [];
+        $config = new Configuration('test_export_import');
+        $config->clear();
+        foreach ($baseConfig as $k => $v) {
+            $config->set($k, $v, true);
+        }
+        try {
+            foreach ($formats as $format) {
+                $tmpFile = sys_get_temp_dir() . '/configlib_test_' . uniqid() . $format->getExtension();
+                $tmpFiles[] = $tmpFile;
+                $config->export($tmpFile, $format, false);
+                $this->assertFileExists($tmpFile);
+                // Now import into a new config instance
+                $importedConfig = new Configuration('imported_' . uniqid());
+                $importedConfig->clear();
+                $importedConfig->import($tmpFile);
+                $this->assertSame($config->getConfiguration(), $importedConfig->getConfiguration(), 'Config mismatch for format: ' . $format->name);
+            }
+        } finally {
+            foreach ($tmpFiles as $file) {
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+            }
+        }
+    }
+
+    /**
+     * @test
+     * Test export with appendExtension true/false and cleanup
+     */
+    public function testExportAppendExtension(): void
+    {
+        $config = new Configuration('test_append_ext');
+        $config->set('foo.bar', 'baz', true);
+        $tmpFiles = [];
+        try {
+            // With appendExtension = true
+            $fileBase = sys_get_temp_dir() . '/configlib_test_append';
+            $config->export($fileBase, FileFormat::YAML, true);
+            $fileWithExt = $fileBase . FileFormat::YAML->getExtension();
+            $tmpFiles[] = $fileWithExt;
+            $this->assertFileExists($fileWithExt);
+            // With appendExtension = false
+            $fileNoExt = $fileBase . '_noext';
+            $config->export($fileNoExt, FileFormat::JSON, false);
+            $tmpFiles[] = $fileNoExt;
+            $this->assertFileExists($fileNoExt);
+        } finally {
+            foreach ($tmpFiles as $file) {
+                if (file_exists($file)) {
+                    unlink($file);
+                }
+            }
+        }
+    }
 }
