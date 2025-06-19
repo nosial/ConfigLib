@@ -351,10 +351,9 @@
 
             try
             {
-                $json = json_encode($this->configuration, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 $fs = new Filesystem();
 
-                $fs->dumpFile($this->path, $json);
+                $fs->dumpFile($this->path, FileFormat::JSON_PRETTY->serialize($this->configuration));
                 $fs->chmod($this->path, 0777);
             }
             catch (Exception $e)
@@ -380,22 +379,6 @@
             }
 
             $fs = new Filesystem();
-
-            // If the configuration file is a YAML file, import it instead
-            if(str_ends_with($this->path, '.yaml') || str_ends_with($this->path, '.yml'))
-            {
-
-                if(!$fs->exists($this->path))
-                {
-                    throw new RuntimeException(sprintf('Unable to import configuration file "%s" from environment, file does not exist', $this->path));
-                }
-
-                $yaml = file_get_contents($this->path);
-                $this->configuration = Yaml::parse($yaml);
-
-                return;
-            }
-
             if (!$fs->exists($this->path))
             {
                 return;
@@ -403,45 +386,11 @@
 
             try
             {
-                $json = file_get_contents($this->path);
-                $this->configuration = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+                $this->configuration = FileFormat::fromFile($this->path);
             }
             catch (Exception $e)
             {
                 throw new RuntimeException('Unable to read configuration file', $e->getCode(), $e);
-            }
-
-            $prefix = 'CONFIGLIB_' . strtoupper($this->name) . '_';
-
-            foreach (getenv() as $key => $value)
-            {
-                if (str_starts_with($key, $prefix))
-                {
-                    // Remove the prefix and split the rest of the key into parts
-                    $path = explode('_', str_replace($prefix, '', $key));
-                    $current = &$this->configuration;
-
-                    // Navigate to the parent of the value to set, except for the last part
-                    foreach ($path as $index => $key_value)
-                    {
-                        $key_value = strtolower($key_value); // Convert to lowercase if needed
-
-                        if ($index < count($path) - 1)
-                        {
-                            if (!is_array($current) || !array_key_exists($key_value, $current))
-                            {
-                                $current[$key_value] = [];
-                            }
-
-                            $current = &$current[$key_value];
-                        }
-                        else
-                        {
-                            // Set the value for the last part of the path
-                            $current[$key_value] = $value;
-                        }
-                    }
-                }
             }
 
             $this->modified = false;
@@ -511,35 +460,32 @@
         /**
          * Imports a YAML file into the configuration
          *
-         * @param string $path The path to the YAML file
+         * @param string $filePath The path to the configuration file
          * @return void
          */
-        public function import(string $path): void
+        public function import(string $filePath): void
         {
             $fs = new Filesystem();
-
-            if(!$fs->exists($path))
+            if(!$fs->exists($filePath))
             {
-                throw new RuntimeException(sprintf('Unable to import configuration file "%s", file does not exist', $path));
+                throw new RuntimeException(sprintf('Unable to import configuration file "%s", file does not exist', $filePath));
             }
 
-            $yaml = file_get_contents($path);
-            $data = Yaml::parse($yaml);
-
-            $this->configuration = array_replace_recursive($this->configuration, $data);
+            $this->configuration = array_replace_recursive($this->configuration, FileFormat::fromFile($filePath));
             $this->modified = true;
         }
 
         /**
          * Exports the configuration to a YAML file
          *
-         * @param string $path The path to export the configuration to
+         * @param string $filePath The path to export the configuration to
+         * @param FileFormat $fileFormat The file format to export as
+         * @param bool $appendExtension Optional. If True, the appropriate file extension will be appended to the $filePath
          * @return void
          */
-        public function export(string $path): void
+        public function export(string $filePath, FileFormat $fileFormat=FileFormat::YAML, bool $appendExtension=true): void
         {
-            $fs = new Filesystem();
-            $fs->dumpFile($path, $this->toYaml());
-            $fs->chmod($path, 0777);
+            $fileFormat->toFile($this->configuration, $filePath, $appendExtension);
+            chmod($filePath, 0777);
         }
     }
