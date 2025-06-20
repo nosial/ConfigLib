@@ -299,7 +299,7 @@
             {
                 $fs = new Filesystem();
                 $fs->dumpFile($this->path, FileFormat::JSON_PRETTY->serialize($this->configuration));
-                $fs->chmod($this->path, 0666);
+                $fs->chmod($this->path, 0777);
             }
             catch (Exception $e)
             {
@@ -430,7 +430,7 @@
         public function export(string $filePath, FileFormat $fileFormat=FileFormat::YAML, bool $appendExtension=true): void
         {
             $fileFormat->toFile($this->configuration, $filePath, $appendExtension);
-            @chmod($filePath, 0666);
+            @chmod($filePath, 0777);
         }
 
         /**
