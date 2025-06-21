@@ -279,7 +279,7 @@ jobs:
         uses: https://github.com/softprops/action-gh-release@v1
         with:
             files: |
-                debug-executable/*.forgejo/workflows/build.yml
+                debug-executable/*
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
