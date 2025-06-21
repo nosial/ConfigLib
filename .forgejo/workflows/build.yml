@@ -9,8 +9,8 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
+env:
+  PACKAGE_NAME: net.nosial.configlib
 
 jobs:
   build:
@@ -55,47 +55,33 @@ jobs:
       - name: Build project
         run: |
           ncc build --config release --build-source --log-level debug
-          ncc build --config release-executable --build-source --log-level debug
-          ncc build --config release_executable --build-source --log-level debug
           ncc build --config debug --build-source --log-level debug
+          ncc build --config release-executable --build-source --log-level debug
           ncc build --config debug-executable --build-source --log-level debug
-          ncc build --config debug_executable --build-source --log-level debug
 
       - name: Upload build artifact for release
         uses: actions/upload-artifact@v3
         with:
           name: release
-          path: build/release/net.nosial.configlib.ncc
-
-      - name: Upload build artifact for release-executable
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-executable
-          path: build/release/release_executable_gz
-
-      - name: Upload build artifact for release_executable
-        uses: actions/upload-artifact@v3
-        with:
-          name: release_executable
-          path: build/release/ConfigLib
+          path: build/release/${{ env.PACKAGE_NAME }}.ncc
 
       - name: Upload build artifact for debug
         uses: actions/upload-artifact@v3
         with:
           name: debug
-          path: build/debug/net.nosial.configlib.ncc
+          path: build/debug/${{ env.PACKAGE_NAME }}.ncc
+
+      - name: Upload build artifact for release-executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-executable
+          path: build/release/${{ env.PACKAGE_NAME }}
 
       - name: Upload build artifact for debug-executable
         uses: actions/upload-artifact@v3
         with:
           name: debug-executable
-          path: build/debug/debug_executable_gz
-
-      - name: Upload build artifact for debug_executable
-        uses: actions/upload-artifact@v3
-        with:
-          name: debug_executable
-          path: build/debug/ConfigLib
+          path: build/debug/${{ env.PACKAGE_NAME }}
 
   generate-phpdoc:
     needs: [build]
@@ -125,7 +111,7 @@ jobs:
           zip -r docs.zip docs
 
       - name: Upload PHPDoc
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: documentation
           path: docs.zip
@@ -178,7 +164,7 @@ jobs:
 
       - name: Install NCC packages
         run: |
-          ncc package install --package="release/net.nosial.configlib.ncc" --build-source --reinstall -y --log-level debug
+          ncc package install --package="release/$PACKAGE_NAME.ncc" --build-source --reinstall -y --log-level debug
 
       - name: Run PHPUnit tests
         run: |
@@ -198,11 +184,8 @@ jobs:
     if: github.event_name == 'release'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Download documentation artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: documentation
           path: documentation
@@ -213,43 +196,23 @@ jobs:
           name: release
           path: release
 
-      - name: Download release-executable artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: release-executable
-          path: release-executable
-
-      - name: Download release_executable artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: release_executable
-          path: release_executable
-
       - name: Download debug artifact
         uses: actions/download-artifact@v3
         with:
           name: debug
           path: debug
 
+      - name: Download release-executable artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: release-executable
+          path: release-executable
+
       - name: Download debug-executable artifact
         uses: actions/download-artifact@v3
         with:
           name: debug-executable
           path: debug-executable
-
-      - name: Download debug_executable artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: debug_executable
-          path: debug_executable
-
-      - name: Upload documentation artifact
-        uses: https://github.com/softprops/action-gh-release@v1
-        with:
-            files: |
-                documentation/*
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release artifact to release
         uses: https://github.com/softprops/action-gh-release@v1
@@ -280,21 +243,5 @@ jobs:
         with:
             files: |
                 debug-executable/*
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release_executable artifact to release
-        uses: https://github.com/softprops/action-gh-release@v1
-        with:
-            files: |
-                release_executable/*
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload debug_executable artifact to release
-        uses: https://github.com/softprops/action-gh-release@v1
-        with:
-            files: |
-                debug_executable/*
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
