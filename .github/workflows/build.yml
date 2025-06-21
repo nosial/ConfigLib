@@ -1,0 +1,300 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  release:
+    types: [created]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          add-apt-repository ppa:ondrej/php -y
+          apt-get update -yqq
+          apt-get install php8.3 php8.3-{xml,curl,mbstring} -yqq
+
+      - name: Install phive
+        run: |
+          wget -O phive.phar https://phar.io/releases/phive.phar
+          wget -O phive.phar.asc https://phar.io/releases/phive.phar.asc
+          gpg --keyserver hkps://keys.openpgp.org --recv-keys 0x9D8A98B29B2D5D79
+          gpg --verify phive.phar.asc phive.phar
+          chmod +x phive.phar
+          mv phive.phar /usr/local/bin/phive
+
+      - name: Install phab
+        run: |
+          phive install phpab --global --trust-gpg-keys 0x2A8299CE842DD38C
+
+      - name: Install latest version of NCC
+        run: |
+          git clone https://git.n64.cc/nosial/ncc.git
+          cd ncc
+          make redist
+          NCC_DIR=$(find build/ -type d -name "ncc_*" | head -n 1)
+          if [ -z "$NCC_DIR" ]; then
+            echo "NCC build directory not found"
+            exit 1
+          fi
+          php "$NCC_DIR/INSTALL" --auto
+          cd .. && rm -rf ncc
+
+      - name: Build project
+        run: |
+          ncc build --config release --build-source --log-level debug
+          ncc build --config release-executable --build-source --log-level debug
+          ncc build --config release_executable --build-source --log-level debug
+          ncc build --config debug --build-source --log-level debug
+          ncc build --config debug-executable --build-source --log-level debug
+          ncc build --config debug_executable --build-source --log-level debug
+
+      - name: Upload build artifact for release
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: build/release/net.nosial.configlib.ncc
+
+      - name: Upload build artifact for release-executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-executable
+          path: build/release/release_executable_gz
+
+      - name: Upload build artifact for release_executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: release_executable
+          path: build/release/ConfigLib
+
+      - name: Upload build artifact for debug
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug
+          path: build/debug/net.nosial.configlib.ncc
+
+      - name: Upload build artifact for debug-executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-executable
+          path: build/debug/debug_executable_gz
+
+      - name: Upload build artifact for debug_executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug_executable
+          path: build/debug/ConfigLib
+
+  generate-phpdoc:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          add-apt-repository ppa:ondrej/php -y
+          apt-get update -yqq
+          apt-get install php8.3 php8.3-{xml,curl,mbstring} -yqq
+
+      - name: Download PHPDocumentor
+        run: |
+          wget https://phpdoc.org/phpDocumentor.phar
+          chmod +x phpDocumentor.phar
+
+      - name: Generate PHPDoc
+        run: |
+          php phpDocumentor.phar -d src -t docs
+
+      - name: Archive PHPDoc
+        run: |
+          zip -r docs.zip docs
+
+      - name: Upload PHPDoc
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: docs.zip
+
+  test:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: release
+
+      - name: Install dependencies
+        run: |
+          add-apt-repository ppa:ondrej/php -y
+          apt-get update -yqq
+          apt-get install php8.3 php8.3-{xml,curl,mbstring,zip} -yqq
+
+      - name: Install phive
+        run: |
+          wget -O phive.phar https://phar.io/releases/phive.phar
+          wget -O phive.phar.asc https://phar.io/releases/phive.phar.asc
+          gpg --keyserver hkps://keys.openpgp.org --recv-keys 0x9D8A98B29B2D5D79
+          gpg --verify phive.phar.asc phive.phar
+          chmod +x phive.phar
+          mv phive.phar /usr/local/bin/phive
+
+      - name: Install phab
+        run: |
+          phive install phpab --global --trust-gpg-keys 0x2A8299CE842DD38C
+
+      - name: Install latest version of NCC
+        run: |
+          git clone https://git.n64.cc/nosial/ncc.git
+          cd ncc
+          make redist
+          NCC_DIR=$(find build/ -type d -name "ncc_*" | head -n 1)
+          if [ -z "$NCC_DIR" ]; then
+            echo "NCC build directory not found"
+            exit 1
+          fi
+          php "$NCC_DIR/INSTALL" --auto
+          cd .. && rm -rf ncc
+
+      - name: Install NCC packages
+        run: |
+          ncc package install --package="release/net.nosial.configlib.ncc" --build-source --reinstall -y --log-level debug
+
+      - name: Run PHPUnit tests
+        run: |
+          wget https://phar.phpunit.de/phpunit-11.3.phar
+          php phpunit-11.3.phar --configuration phpunit.xml --log-junit reports/junit.xml --log-teamcity reports/teamcity --testdox-html reports/testdox.html --testdox-text reports/testdox.txt
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: reports
+
+  release:
+    needs: [build, generate-phpdoc, test]
+    permissions: write-all
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download documentation artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: documentation
+
+      - name: Download release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: release
+
+      - name: Download release-executable artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-executable
+          path: release-executable
+
+      - name: Download release_executable artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release_executable
+          path: release_executable
+
+      - name: Download debug artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: debug
+          path: debug
+
+      - name: Download debug-executable artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: debug-executable
+          path: debug-executable
+
+      - name: Download debug_executable artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: debug_executable
+          path: debug_executable
+
+      - name: Upload documentation artifact
+        uses: https://github.com/softprops/action-gh-release@v1
+        with:
+            files: |
+                documentation/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release artifact to release
+        uses: https://github.com/softprops/action-gh-release@v1
+        with:
+            files: |
+                release/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload debug artifact to release
+        uses: https://github.com/softprops/action-gh-release@v1
+        with:
+            files: |
+                debug/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release-executable artifact to release
+        uses: https://github.com/softprops/action-gh-release@v1
+        with:
+            files: |
+                release-executable/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload debug-executable artifact to release
+        uses: https://github.com/softprops/action-gh-release@v1
+        with:
+            files: |
+                debug-executable/*.forgejo/workflows/build.yml
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release_executable artifact to release
+        uses: https://github.com/softprops/action-gh-release@v1
+        with:
+            files: |
+                release_executable/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload debug_executable artifact to release
+        uses: https://github.com/softprops/action-gh-release@v1
+        with:
+            files: |
+                debug_executable/*
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
