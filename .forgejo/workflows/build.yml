@@ -111,7 +111,7 @@ jobs:
           zip -r docs.zip docs
 
       - name: Upload PHPDoc
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: documentation
           path: docs.zip
@@ -185,7 +185,7 @@ jobs:
 
     steps:
       - name: Download documentation artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: documentation
           path: documentation
