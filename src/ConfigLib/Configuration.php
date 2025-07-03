@@ -257,10 +257,16 @@
         {
             $envValue = $environmentVariable !== null ? getenv($environmentVariable) : false;
 
+            // If environment variable is set and should override
             if(($override && $envValue !== false) || (is_string($envValue) && strlen($envValue) > 0))
             {
-                $this->set($key, $envValue, true);
-                return true;
+                if (!$this->exists($key) || $this->get($key) !== $envValue)
+                {
+                    $this->set($key, $envValue, true);
+                    return true;
+                }
+
+                return false;
             }
 
             if($this->exists($key))
@@ -454,3 +460,4 @@
             return FileFormat::YAML->serialize($this->configuration);
         }
     }
+
