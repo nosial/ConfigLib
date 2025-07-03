@@ -78,7 +78,7 @@
             {
                 "name": "release-executable",
                 "build_type": "executable",
-                "output": "build/release/release_executable_gz",
+                "output": "build/release/%ASSEMBLY.PACKAGE%",
                 "options": {
                     "ncc_configuration": "release"
                 }
@@ -86,28 +86,9 @@
             {
                 "name": "debug-executable",
                 "build_type": "executable",
-                "output": "build/debug/debug_executable_gz",
+                "output": "build/debug/%ASSEMBLY.PACKAGE%",
                 "options": {
                     "ncc_configuration": "debug"
-                }
-            },
-            {
-                "name": "release_executable",
-                "build_type": "executable",
-                "output": "build/release/%ASSEMBLY.NAME%",
-                "options": {
-                    "ncc_configuration": "release"
-                }
-            },
-            {
-                "name": "debug_executable",
-                "build_type": "executable",
-                "output": "build/debug/%ASSEMBLY.NAME%",
-                "options": {
-                    "ncc_configuration": "debug"
-                },
-                "define_constants": {
-                    "DEBUG": "1"
                 }
             }
         ]
