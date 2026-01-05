@@ -1,0 +1,45 @@
+source: src
+default_build: release
+entry_point: main_policy
+update_source: nosial/configlib@n64
+repository:
+  name: n64
+  type: gitlab
+  host: git.n64.cc
+  ssl: true
+assembly:
+  name: ConfigLib
+  package: net.nosial.configlib
+  version: 1.1.8
+  description: 'ConfigLib is a library for reading and writing configuration files'
+  copyright: 'Copyright (c) 2022-2026 Nosial'
+dependencies:
+  net.nosial.optslib: nosial/optslib@github
+  net.nosial.loglib2: nosial/loglib2@github
+  com.symfony.filesystem: symfony/filesystem@packagist
+  com.symfony.yaml: symfony/yaml@packagist
+  com.symfony.process: symfony/process@packagist
+execution_units:
+  -
+    name: main
+    type: php
+    mode: auto
+    entry: main
+    working_directory: '${CWD}'
+  -
+    name: main_policy
+    type: php
+    mode: auto
+    entry: main
+    working_directory: '${CWD}'
+build_configurations:
+  -
+    name: release
+    output: 'build/release/${ASSEMBLY.PACKAGE}.ncc'
+    type: ncc
+  -
+    name: debug
+    output: 'build/debug/${ASSEMBLY.PACKAGE}.ncc'
+    type: ncc
+    definitions:
+      DEBUG: '1'

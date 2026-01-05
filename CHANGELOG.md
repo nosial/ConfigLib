@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8] - 2026-01-05
+
+This update introduces project support for ncc v3.+
+
+
 ## [1.1.7] - 2025-03-14
 
 This update introduces minor changes
@@ -34,6 +39,11 @@ This update introduces minor improvements
 
 ### Added
  - Add support for CONFIGLIB_PATH environment variable to specify the path to the configuration files directory
+
+
+## [1.1.5] - 2026-01-05
+
+This update introduces a minor fix
 
 
 ## [1.1.4] - 2024-10-29
