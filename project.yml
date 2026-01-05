@@ -37,9 +37,12 @@ build_configurations:
     name: release
     output: 'target/release/${ASSEMBLY.PACKAGE}.ncc'
     type: ncc
+    definitions:
+      CONFIGLIB_VERSION: '${ASSEMBLY.VERSION}'
   -
     name: debug
     output: 'target/debug/${ASSEMBLY.PACKAGE}.ncc'
     type: ncc
     definitions:
+      CONFIGLIB_VERSION: '${ASSEMBLY.VERSION}'
       DEBUG: '1'
