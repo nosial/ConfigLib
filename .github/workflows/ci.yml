@@ -38,7 +38,7 @@ jobs:
 
       - name: Build project
         run: |
-          ncc project install -y
+          ncc project install --log-level debug -y
           ncc build --config release --log-level debug
 
       - name: Upload build artifact
@@ -76,7 +76,7 @@ jobs:
 
       - name: Build project
         run: |
-          ncc project install -y
+          ncc project install --log-level debug -y
           ncc build --config debug --log-level debug
 
       - name: Upload build artifact
@@ -186,7 +186,7 @@ jobs:
 
       - name: Install ncc packages
         run: |
-          ncc project install -y
+          ncc project install --log-level debug -y
           ncc build --config=release --log-level debug
 
       - name: Download PHPUnit
