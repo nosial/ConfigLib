@@ -1,7 +1,7 @@
 <?PHP
         require 'ncc';
 
-        $buildOutputPath = __DIR__ . DIRECTORY_SEPARATOR . '../build/release/net.nosial.configlib.ncc';
+        $buildOutputPath = __DIR__ . DIRECTORY_SEPARATOR . '../target/release/net.nosial.configlib.ncc';
         if(getenv('NCC_BUILD_OUTPUT_PATH'))
         {
             $buildOutputPath = getenv('NCC_BUILD_OUTPUT_PATH');

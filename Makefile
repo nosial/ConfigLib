@@ -1,7 +1,7 @@
-all: build/release/net.nosial.configlib.ncc build/debug/net.nosial.configlib.ncc
-build/release/net.nosial.configlib.ncc:
+all: target/release/net.nosial.configlib.ncc target/debug/net.nosial.configlib.ncc
+target/release/net.nosial.configlib.ncc:
 	ncc build --configuration release --log-level debug
-build/debug/net.nosial.configlib.ncc:
+target/debug/net.nosial.configlib.ncc:
 	ncc build --configuration debug --log-level debug
 
 test:
@@ -12,8 +12,8 @@ docs:
 	phpdoc --config phpdoc.dist.xml
 
 clean:
-	rm build/release/net.nosial.configlib.ncc
-	rm build/debug/net.nosial.configlib.ncc
+	rm target/release/net.nosial.configlib.ncc
+	rm target/debug/net.nosial.configlib.ncc
 	rm target/docs
 	rm target/cache
 
