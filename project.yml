@@ -10,7 +10,7 @@ repository:
 assembly:
   name: ConfigLib
   package: net.nosial.configlib
-  version: 1.1.8
+  version: 1.1.12
   description: 'ConfigLib is a library for reading and writing configuration files'
   copyright: 'Copyright (c) 2022-2026 Nosial'
 dependencies:

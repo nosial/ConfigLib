@@ -5,9 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.8] - 2026-01-05
+## [1.1.12] - 2026-01-05
 
-This update introduces project support for ncc v3.+
+This update introduces project compatibility support for ncc v3.+
+
+
+## [1.1.11] - 2025-06-02
+
+This update introduces a minor bug fix
+
+### Fixed
+- Enhance environment variable handling in Configuration class to prevent unnecessary overrides
+
+
+## [1.1.10] - 2025-05-20
+
+This update introduces a minor bug fix
+
+### Fixed
+- Update file permissions to 0777 for configuration file handling
+
+
+## [1.1.9] - 2025-05-19
+
+This update introduces minor changes and improvements
+
+### Changed
+- Refactor Configuration class to use FileFormat for serialization and deserialization
+- Added two new parameters to \ConfigLib\Configuration->setDefault called `?string $environmentVariable=null, bool $override=true`
+  which allows the program to override the default configuration value with an environment variable if one is set.
+- Refactor Configuration class for improved environment variable handling and path validation
+- Add string representation methods for configuration serialization
+
+
+## [1.1.8] - 2025-03-21
+
+This update introduces minor changes
+
+### Changed
+- Disabled tty mode for the main execution points to prevent issues with docker environments
+- Refactor exception handling in Configuration class to include error codes
+
 
 
 ## [1.1.7] - 2025-03-14
