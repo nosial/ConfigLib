@@ -53,17 +53,13 @@ We do encourage community support and discussions, please be respectful and foll
 The library can be installed using ncc:
 
 ```bash
-ncc install -p "nosial/libs.config=latest@n64"
+ncc --install="nosial/libs.config=latest@n64"
 ```
 
-or by adding the following to your project.json file under the `build.dependencies` section:
-```json
-{
-  "name": "net.nosial.configlib",
-  "version": "latest",
-  "source_type": "remote",
-  "source": "nosial/libs.config=latest@n64"
-}
+or by adding the following to your project.json file under the `dependencies` section:
+```yaml
+dependencies:
+  net.nosial.configlib: nosial/configlib@n64
 ```
 
 If you don't have the n64 source configured, you can add it by running the following command:
