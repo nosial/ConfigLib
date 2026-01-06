@@ -4,7 +4,7 @@ entry_point: main_policy
 update_source: nosial/configlib@n64
 repository:
   name: n64
-  type: gitlab
+  type: github
   host: git.n64.cc
   ssl: true
 assembly:
