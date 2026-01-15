@@ -243,7 +243,7 @@
             }
 
             // Check if the file has changed and if so, update the configuration
-            if($fs->exists($tempFile))
+            if(IO::exists($tempFile))
             {
                 $new_hash = hash_file('sha1', $tempFile);
                 if($original_hash !== $new_hash)
@@ -272,7 +272,7 @@
                     try
                     {
                         $path = $configuration->getPath();
-                        $fs->dumpFile($path, json_encode($json, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+                        IO::writeFile($path, json_encode($json, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
                     }
                     catch(Exception $e)
                     {
@@ -285,9 +285,9 @@
             }
 
             // Remove the temporary file
-            if($fs->exists($tempFile))
+            if(IO::exists($tempFile))
             {
-                $fs->remove($tempFile);
+                IO::delete($tempFile);
             }
 
             exit(0);
