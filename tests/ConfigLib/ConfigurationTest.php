@@ -14,6 +14,15 @@ class ConfigurationTest extends TestCase
         {
             unlink($config->getPath());
         }
+
+        // Clean up test config files
+        $testConfigs = ['test_env_override_true', 'test_env_override_false'];
+        foreach ($testConfigs as $testConfig) {
+            $config = new Configuration($testConfig);
+            if(file_exists($config->getPath())) {
+                unlink($config->getPath());
+            }
+        }
     }
 
     public function testConstruct(): void

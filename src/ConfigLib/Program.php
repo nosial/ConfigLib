@@ -3,10 +3,10 @@
     namespace ConfigLib;
 
     use Exception;
+    use fslib\IO;
     use JetBrains\PhpStorm\NoReturn;
     use OptsLib\Parse;
     use RuntimeException;
-    use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Process\Process;
     use Symfony\Component\Yaml\Exception\ParseException;
     use Symfony\Component\Yaml\Yaml;
@@ -49,10 +49,9 @@
                 $configuration = new Configuration($configuration_name);
 
                 // Check if the configuration exists first.
-                if(!file_exists($configuration->getPath()))
+                if(!IO::exists($configuration->getPath()))
                 {
                     print(sprintf('Configuration \'%s\' does not exist, aborting' . PHP_EOL, $configuration->getName()));
-
                     exit(1);
                 }
 
@@ -194,37 +193,41 @@
             }
 
             // Determine the temporary path to use
-            if(file_exists(DIRECTORY_SEPARATOR . 'tmp'))
+            if(IO::exists(DIRECTORY_SEPARATOR . 'tmp'))
             {
                 $tempPath = DIRECTORY_SEPARATOR . 'tmp';
             }
             else
             {
                 $temporary_directory = sys_get_temp_dir();
-                if(!file_exists($temporary_directory . DIRECTORY_SEPARATOR . 'configlib'))
+                $configlibDir = $temporary_directory . DIRECTORY_SEPARATOR . 'configlib';
+                
+                if(!IO::exists($configlibDir))
                 {
-                    if (!mkdir($concurrentDirectory = $temporary_directory . DIRECTORY_SEPARATOR . 'configlib', 0777, true) && !is_dir($concurrentDirectory))
+                    try
                     {
-                        throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+                        IO::createDirectory($configlibDir, 0777, true);
+                    }
+                    catch(Exception $e)
+                    {
+                        throw new RuntimeException(sprintf('Directory "%s" was not created', $configlibDir), 0, $e);
                     }
 
-                    if(!file_exists($temporary_directory . DIRECTORY_SEPARATOR . 'configlib'))
+                    if(!IO::exists($configlibDir))
                     {
                         print('Unable to create the temporary path to use' . PHP_EOL);
                         exit(1);
                     }
                 }
 
-                $tempPath = $temporary_directory . DIRECTORY_SEPARATOR . 'configlib';
+                $tempPath = $configlibDir;
             }
-
-            $fs = new Filesystem();
 
             try
             {
                 // Convert the configuration from JSON to YAML for editing purposes
                 $tempFile = $tempPath . DIRECTORY_SEPARATOR . bin2hex(random_bytes(16)) . '.yaml';
-                $fs->dumpFile($tempFile, $configuration->toYaml());
+                IO::writeFile($tempFile, $configuration->toYaml());
                 $original_hash = hash_file('sha1', $tempFile);
 
                 // Open the editor
@@ -246,7 +249,15 @@
                 if($original_hash !== $new_hash)
                 {
                     // Convert the YAML back to JSON
-                    $yaml = file_get_contents($tempFile);
+                    try
+                    {
+                        $yaml = IO::readFile($tempFile);
+                    }
+                    catch(Exception $e)
+                    {
+                        print('Unable to read the temporary file, ' . $e->getMessage() . PHP_EOL);
+                        exit(1);
+                    }
 
                     try
                     {

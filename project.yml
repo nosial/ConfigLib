@@ -10,13 +10,13 @@ repository:
 assembly:
   name: ConfigLib
   package: net.nosial.configlib
-  version: 1.1.12
+  version: 1.1.13
   description: 'ConfigLib is a library for reading and writing configuration files'
   copyright: 'Copyright (c) 2022-2026 Nosial'
 dependencies:
   net.nosial.optslib: nosial/optslib@github
   net.nosial.loglib2: nosial/loglib2@github
-  com.symfony.filesystem: symfony/filesystem@packagist
+  net.nosial.fslib: nosial/fslib@github
   com.symfony.yaml: symfony/yaml@packagist
   com.symfony.process: symfony/process@packagist
 execution_units:

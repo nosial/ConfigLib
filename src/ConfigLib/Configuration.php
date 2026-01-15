@@ -3,9 +3,10 @@
     namespace ConfigLib;
 
     use Exception;
+    use fslib\IO;
+    use fslib\IOException;
     use LogLib2\Logger;
     use RuntimeException;
-    use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Yaml\Yaml;
 
     class Configuration
@@ -32,7 +33,7 @@
             $env = getenv(sprintf("CONFIGLIB_%s", strtoupper($sanitizedName)));
             $this->path = null;
 
-            if($env !== false && file_exists($env))
+            if($env !== false && IO::exists($env))
             {
                 $this->path = $env;
             }
@@ -45,7 +46,7 @@
             {
                 $dir = dirname($path);
 
-                if(!is_dir($dir) || !is_writable($dir))
+                if(!IO::isDirectory($dir) || !IO::isWritable($dir))
                 {
                     throw new RuntimeException(sprintf('Directory "%s" does not exist or is not writable', $dir));
                 }
@@ -81,10 +82,21 @@
 
                         foreach ($configDirs as $dir)
                         {
-                            if ((file_exists($dir) && is_writable($dir)) || (!file_exists($dir) && @mkdir($dir, 0755, true)))
+                            if ((IO::exists($dir) && IO::isWritable($dir)) || (!IO::exists($dir) && IO::isWritable(dirname($dir))))
                             {
-                                $configDir = $dir;
-                                break;
+                                try
+                                {
+                                    if(!IO::exists($dir))
+                                    {
+                                        IO::createDirectory($dir, 0755, true);
+                                    }
+                                    $configDir = $dir;
+                                    break;
+                                }
+                                catch(Exception)
+                                {
+                                    continue;
+                                }
                             }
                         }
 
@@ -96,9 +108,16 @@
                     }
                 }
 
-                if (!file_exists($configDir) && !@mkdir($configDir, 0755, true) && !is_dir($configDir))
+                if (!IO::exists($configDir))
                 {
-                    throw new RuntimeException(sprintf('Directory "%s" was not created', $configDir));
+                    try
+                    {
+                        IO::createDirectory($configDir, 0755, true);
+                    }
+                    catch(IOException $e)
+                    {
+                        throw new RuntimeException(sprintf('Directory "%s" was not created', $configDir), 0, $e);
+                    }
                 }
 
                 $this->path = $configDir . DIRECTORY_SEPARATOR . $filePath;
@@ -107,7 +126,7 @@
             $this->name = $sanitizedName;
             $this->modified = false;
 
-            if(file_exists($this->path))
+            if(IO::exists($this->path))
             {
                 try
                 {
@@ -303,9 +322,8 @@
 
             try
             {
-                $fs = new Filesystem();
-                $fs->dumpFile($this->path, FileFormat::JSON_PRETTY->serialize($this->configuration));
-                $fs->chmod($this->path, 0777);
+                IO::writeFile($this->path, FileFormat::JSON_PRETTY->serialize($this->configuration));
+                @chmod($this->path, 0777);
             }
             catch (Exception $e)
             {
@@ -328,8 +346,7 @@
             {
                 return;
             }
-            $fs = new Filesystem();
-            if (!$fs->exists($this->path))
+            if (!IO::exists($this->path))
             {
                 return;
             }
@@ -413,9 +430,7 @@
          */
         public function import(string $filePath): void
         {
-            $fs = new Filesystem();
-
-            if(!$fs->exists($filePath))
+            if(!IO::exists($filePath))
             {
                 throw new RuntimeException(sprintf('Unable to import configuration file "%s", file does not exist', $filePath));
             }

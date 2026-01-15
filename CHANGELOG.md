@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.1.13] - 2026-01-15
+
+This update introduces major improvements including migration to fslib for filesystem operations, 
+enhanced FileFormat support, and improved error handling.
+
+### Changed
+- Migrated from Symfony Filesystem component to fslib (net.nosial.fslib) for all filesystem operations
+
+### Fixed
+- Fixed environment variable path validation to check file existence before using
+- Fixed directory creation logic to properly handle permissions and errors
+
+### Removed
+- Removed Symfony Filesystem dependency in favor of fslib
+
+
 ## [1.1.12] - 2026-01-05
 
 This update introduces project compatibility support for ncc v3.+

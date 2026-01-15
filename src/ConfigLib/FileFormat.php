@@ -2,6 +2,9 @@
 
     namespace ConfigLib;
 
+    use Exception;
+    use fslib\IO;
+    use fslib\IOException;
     use InvalidArgumentException;
     use RuntimeException;
     use SebastianBergmann\LinesOfCode\IllogicalValuesException;
@@ -50,9 +53,13 @@
                 $filePath .= $this->getExtension(false);
             }
 
-            if(!@file_put_contents($filePath, $this->serialize($data)))
+            try
             {
-                throw new RuntimeException(sprintf("Unable to write to file: %s", $filePath));
+                IO::writeFile($filePath, $this->serialize($data));
+            }
+            catch(IOException $e)
+            {
+                throw new RuntimeException(sprintf("Unable to write to file: %s", $filePath), 0, $e);
             }
         }
 
@@ -97,12 +104,12 @@
          */
         public static function fromFile(string $filePath, ?FileFormat $fileFormat=null): array
         {
-            if(!file_exists($filePath))
+            if(!IO::exists($filePath))
             {
                 throw new InvalidArgumentException(sprintf("The file path %s does exist", $filePath));
             }
 
-            if(!is_readable($filePath))
+            if(!IO::isReadable($filePath))
             {
                 throw new RuntimeException(sprintf("No read access to %s", $filePath));
             }
@@ -135,6 +142,13 @@
                 }
             }
 
-            return $fileFormat->unserialize(file_get_contents($filePath));
+            try
+            {
+                return $fileFormat->unserialize(IO::readFile($filePath));
+            }
+            catch(Exception $e)
+            {
+                throw new RuntimeException(sprintf("Unable to read file: %s", $filePath), 0, $e);
+            }
         }
     }
