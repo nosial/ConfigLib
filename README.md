@@ -1,4 +1,4 @@
-# ConfigLib
+# <picture><source media="(prefers-color-scheme: dark)" srcset="assets/icon/configlib_light.svg"><img src="assets/icon/configlib_dark.svg" alt="ConfigLib" width="32" height="32"></picture> ConfigLib
 
 ConfigLib is a PHP library for managing configuration files and storing it  in NCC's data, while providing a command
 line interface for running functions such as editing configuration files inline or importing/exporting configuration
@@ -43,7 +43,7 @@ We do encourage community support and discussions, please be respectful and foll
       * [Using an external editor](#using-an-external-editor)
       * [Inline command line editor](#inline-command-line-editor)
     * [Environment Variables](#environment-variables)
-      * [Importing a YAML file](#importing-a-yaml-file)
+      * [Using a specific file](#using-a-specific-file)
       * [Overriding configuration values](#overriding-configuration-values)
   * [License](#license)
 <!-- TOC -->
@@ -53,18 +53,19 @@ We do encourage community support and discussions, please be respectful and foll
 The library can be installed using ncc:
 
 ```bash
-ncc --install="nosial/libs.config=latest@n64"
+ncc install nosial/configlib=latest@n64
 ```
 
-or by adding the following to your project.json file under the `dependencies` section:
+or by adding the following to your project.yml file under the `dependencies` section:
 ```yaml
 dependencies:
   net.nosial.configlib: nosial/configlib@n64
 ```
 
-If you don't have the n64 source configured, you can add it by running the following command:
+The `n64` repository is configured by ncc's installer. If it is missing, you can add it by running the following
+command:
 ```bash
-ncc source add --name n64 --type gitlab --host git.n64.cc
+ncc repo add --name n64 --type github --host git.n64.cc
 ```
 
 ## Compile from source
@@ -78,7 +79,7 @@ ncc build
 
 ## Requirements
 
-The library requires PHP 8.0 or higher.
+The library requires ncc and PHP 8.3 or higher.
 
 ## Documentation
 
@@ -94,8 +95,21 @@ configuration file.
 
 ### Storage Location
 
-Configuration files are stored as json files in the data directory of ConfigLib which is located at
-`/var/ncc/data/net.nosial.configlib`, this directory is created automatically when the library is installed.
+Each configuration is stored as a JSON file named after the configuration, with dots and slashes replaced by
+underscores, for example the configuration `com.example.app` is stored as `com_example_app.conf`. The file is stored in
+the first of the following directories that can be written to:
+
+ 1. The directory set by the `CONFIGLIB_PATH` environment variable, if set
+ 2. `~/.configlib`
+ 3. `~/.config/configlib`
+ 4. `/etc/configlib`
+ 5. `/var/lib/configlib`
+ 6. Otherwise, a `configlib` directory in the system's temporary directory
+
+On Windows, the `ConfigLib` directory in the user's application data directory is used instead. A specific file can also
+be used by passing its path as the second argument of `new \ConfigLib\Configuration()`, or with an environment variable,
+see [Environment Variables](#environment-variables). Run `configlib --conf <config_name> --path` to see where a
+configuration is stored.
 
 ### Creating a new configuration file
 
@@ -154,7 +168,7 @@ configlib --config <config_name> --export <filename>
 
 Exported configuration files are stored as YAML files.
 
- > Note: if the filename is not specified, the configuration file will be exported to the current working directory with the name `<config_name>.yaml`
+ > Note: if the filename is not specified, the configuration file will be exported to the current working directory with the name `<config_name>.yml`
 
 
 
@@ -218,33 +232,36 @@ configlib --config <config_name> --property database.username --value root
 
 ### Environment Variables
 
-ConfigLib can be interacted with using environment variables with two functions
+ConfigLib reads environment variables in three ways:
 
- - Import a YAML file
- - Override configuration values
+ - `CONFIGLIB_PATH` sets the directory configuration files are stored in, see [Storage Location](#storage-location)
+ - `CONFIGLIB_<CONFIG_NAME>` makes a configuration use a specific file instead
+ - The third argument of `setDefault()` lets a program read a value from an environment variable of its choice
 
-#### Importing a YAML file
+#### Using a specific file
 
-You can tell ConfigLib to load a YAML file by setting the `CONFIGLIB_<CONFIG_NAME>` environment variable with the path
-to the YAML file as the value, for example:
+You can tell ConfigLib to use a specific file for a configuration by setting the `CONFIGLIB_<CONFIG_NAME>` environment
+variable to the path of the file, where `<CONFIG_NAME>` is the configuration's name in capitals with dots and slashes
+replaced by underscores. The file may be JSON (`.json`, `.conf`) or YAML (`.yaml`, `.yml`), and changes are saved
+back to the same file, for example:
 
 ```bash
 export CONFIGLIB_MYCONFIG=/path/to/myconfig.yaml
+export CONFIGLIB_COM_EXAMPLE_APP=/path/to/app.conf
 ```
+
+If the file does not exist, ConfigLib logs a warning and uses its usual storage location instead.
 
 #### Overriding configuration values
 
-If loading an entire YAML file is too much, you can override specific configuration values by setting the environment
-variable `CONFIGLIB_<CONFIG_NAME>_<PROPERTY_NAME>` with the value you want to set, for example:
+A program can let a value be set from the environment by naming an environment variable when it sets the default:
 
-```bash
-export CONFIGLIB_MYCONFIG_DATABASE_USERNAME=root
+```php
+$config->setDefault('database.username', 'root', 'MYAPP_DATABASE_USERNAME');
 ```
 
-This would override the `database.username` property in the `myconfig` configuration file even if the property is
-already set, the environment variable will take precedence.
-
-
+When `MYAPP_DATABASE_USERNAME` is set, its value is used and saved instead of the default, even if the property is
+already set in the configuration file.
 
 ## License
 
