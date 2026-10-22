@@ -10,8 +10,13 @@ repository:
 assembly:
   name: ConfigLib
   package: net.nosial.configlib
-  version: 1.1.13
+  version: 1.1.14
+  url: 'https://github.com/nosial/ConfigLib'
+  license: 'MIT'
   description: 'ConfigLib is a library for reading and writing configuration files'
+  author: 'Netkas <netkas@nosial.net>'
+  organization: 'Nosial'
+  product: 'Libraries'
   copyright: 'Copyright (c) 2022-2026 Nosial'
 dependencies:
   net.nosial.optslib: nosial/optslib@github

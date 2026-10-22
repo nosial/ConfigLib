@@ -1,4 +1,4 @@
-# ConfigLib
+# <picture><source media="(prefers-color-scheme: dark)" srcset="assets/icon/configlib_light.svg"><img src="assets/icon/configlib_dark.svg" alt="ConfigLib" width="32" height="32"></picture> ConfigLib
 
 ConfigLib is a PHP library for managing configuration files and storing it  in NCC's data, while providing a command
 line interface for running functions such as editing configuration files inline or importing/exporting configuration
@@ -53,10 +53,10 @@ We do encourage community support and discussions, please be respectful and foll
 The library can be installed using ncc:
 
 ```bash
-ncc --install="nosial/libs.config=latest@n64"
+ncc install --package="nosial/configlib=latest@n64"
 ```
 
-or by adding the following to your project.json file under the `dependencies` section:
+or by adding the following to your project.yml file under the `dependencies` section:
 ```yaml
 dependencies:
   net.nosial.configlib: nosial/configlib@n64
@@ -64,7 +64,7 @@ dependencies:
 
 If you don't have the n64 source configured, you can add it by running the following command:
 ```bash
-ncc source add --name n64 --type gitlab --host git.n64.cc
+ncc repository add --name n64 --type github --host git.n64.cc
 ```
 
 ## Compile from source
@@ -78,7 +78,8 @@ ncc build
 
 ## Requirements
 
-The library requires PHP 8.0 or higher.
+Building and installing the library with current ncc requires PHP 8.4.1 or newer and ncc 3.
+Use a supported PHP release with the latest security fixes.
 
 ## Documentation
 

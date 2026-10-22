@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.14] - 2026-10-22
+
+This update brings the project up to date with ncc 3.1.11
+
+### Changed
+ - Completed the ncc 3 assembly metadata with the project URL, MIT license, author, organization and product.
+ - Added the project's light and dark icons from NosialFrontier to the README header.
+ - Updated installation instructions to use project.yml and the current ncc repository and package commands.
+ - Migrated GitLab CI to the existing ncc image and target/ artifacts; removed the duplicate legacy Forgejo
+   build workflow.
+
+
 ## [1.1.13] - 2026-01-15
 
 This update introduces major improvements including migration to fslib for filesystem operations, 
