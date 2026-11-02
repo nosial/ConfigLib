@@ -20,6 +20,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build project
+        env:
+          NCC_SIGNING_KEY: ${{ secrets.NCC_SIGNING_KEY }}
+          NCC_SIGNING_KEY_PASSPHRASE: ${{ secrets.NCC_SIGNING_KEY_PASSPHRASE }}
         run: |
           ncc project install --log-level debug -y
           ncc build --config release --log-level debug
@@ -40,6 +43,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build project
+        env:
+          NCC_SIGNING_KEY: ${{ secrets.NCC_SIGNING_KEY }}
+          NCC_SIGNING_KEY_PASSPHRASE: ${{ secrets.NCC_SIGNING_KEY_PASSPHRASE }}
         run: |
           ncc project install --log-level debug -y
           ncc build --config debug --log-level debug
