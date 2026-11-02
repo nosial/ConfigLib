@@ -205,12 +205,14 @@
 
             $path = explode('.', $key);
             $current = &$this->configuration;
+            $created = false;
 
             foreach ($path as $keyPart)
             {
                 if (!is_array($current))
                 {
                     $current = [];
+                    $created = true;
                 }
 
                 if (!array_key_exists($keyPart, $current))
@@ -218,6 +220,7 @@
                     if ($create)
                     {
                         $current[$keyPart] = [];
+                        $created = true;
                     }
                     else
                     {
@@ -225,6 +228,11 @@
                     }
                 }
                 $current = &$current[$keyPart];
+            }
+
+            if (!$created && $current === $value)
+            {
+                return true;
             }
 
             $current = $value;
