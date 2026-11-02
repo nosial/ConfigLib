@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.15] - Ongoing
+## [1.1.15] - 2026-11-02
 
-This is an ongoing update
+This update introduces a minor optimization
+
+### Changed
+ - `Configuration::set()` no longer marks the configuration as modified when the key already has the given value, so
+   the configuration file is no longer written again (eg; by the destructor) when nothing changed
+
 
 
 ## [1.1.14] - 2026-10-22
